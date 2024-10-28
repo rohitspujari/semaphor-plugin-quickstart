@@ -1,0 +1,49 @@
+{
+  "visuals": [
+    {
+      "name": "Card One",
+      "component": "CardOne",
+      "settings": {
+        "label": {
+          "title": "Card Label",
+          "defaultValue": "Card One",
+          "ui": "input"
+        },
+        "orientation": {
+          "title": "Orientation",
+          "defaultValue": "horizontal",
+          "ui": "select",
+          "options": [
+            { "label": "Horizontal", "value": "horizontal" },
+            { "label": "Vertical", "value": "vertical" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Card Two",
+      "component": "CardTwo",
+      "settings": {
+        "label": {
+          "title": "Card Label",
+          "defaultValue": "Card One",
+          "ui": "input"
+        },
+        "orientation": {
+          "title": "Orientation",
+          "defaultValue": "horizontal",
+          "ui": "select",
+          "options": [
+            { "label": "Horizontal", "value": "horizontal" },
+            { "label": "Vertical", "value": "vertical" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "display-card",
+      "component": "DisplayCard",
+      "dataInputs": ["Chart Data", "Table Data", "KPI Data"]
+    }
+  ]
+}
