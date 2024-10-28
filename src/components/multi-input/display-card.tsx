@@ -1,14 +1,9 @@
 import { CardOne } from '../single-input/card-one';
 import { CardTwo } from '../single-input/card-two';
 
-import { DataArray } from '../types';
+import { MultiInputVisualProps } from '../types';
 
-type DisplayCardProps = {
-  data: DataArray;
-  settings?: Record<string, string | number | boolean>[];
-};
-
-export function DisplayCard({ data, settings }: DisplayCardProps) {
+export function DisplayCard({ data, settings }: MultiInputVisualProps) {
   return (
     <div className="space-y-2">
       <CardOne data={data[0]} settings={settings?.[0]} />

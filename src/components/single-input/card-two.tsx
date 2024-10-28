@@ -1,11 +1,6 @@
-import { Data } from '../types';
+import { Data, SingleInputVisualProps } from '../types';
 
-type CardTwoProps = {
-  data: Record<string, string | number | boolean>[];
-  settings?: Record<string, string | number | boolean>;
-};
-
-export function CardTwo({ data, settings }: CardTwoProps) {
+export function CardTwo({ data, settings }: SingleInputVisualProps) {
   // render a table
   const renderData = (data: Data) => {
     if (!data) return null;
