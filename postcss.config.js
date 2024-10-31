@@ -14,9 +14,14 @@ export default {
     postcssPrefixSelector({
       prefix: '.semaphor-custom',
       transform(prefix, selector, prefixedSelector) {
-        if (selector.startsWith('html') || selector.startsWith('body')) {
-          return selector; // Skip prefixing html or body if necessary
+        if (
+          // selector.startsWith('html') ||
+          selector.startsWith('.dark') ||
+          selector.startsWith(':root')
+        ) {
+          return selector; // Skip prefixing for html and dark and :root
         }
+
         return prefixedSelector;
       },
     }),
