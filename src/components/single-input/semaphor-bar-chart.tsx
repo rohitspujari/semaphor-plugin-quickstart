@@ -24,17 +24,17 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart';
+} from '@/components/ui-globals/semaphor-chart';
 import { ChartDataItem, generateChartConfig } from './chart-data-utils';
 
 export const description = 'A stacked area chart';
 
-type BarChartMultipleProps = {
+type SemaphorBarChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
 };
 
-export function BarChartMultiple({ data }: BarChartMultipleProps) {
+export function SemaphorBarChart({ data }: SemaphorBarChartProps) {
   if (!data || data?.length === 0) return null;
 
   //   const type = settings?.type || 'natural';
@@ -72,7 +72,6 @@ export function BarChartMultiple({ data }: BarChartMultipleProps) {
             <Bar
               key={key}
               dataKey={key}
-              //   type={type as CurveType}
               fill={chartConfig[key]?.color}
               //   fillOpacity={0.4}
               //   stroke={chartConfig[key]?.color}
@@ -85,7 +84,6 @@ export function BarChartMultiple({ data }: BarChartMultipleProps) {
       </ChartContainer>
     );
   }
-  // console.log(chartData, 'chartData');
 
   return <>{renderChartContainer()}</>;
 }

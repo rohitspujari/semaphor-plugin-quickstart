@@ -1,7 +1,8 @@
 import { CardOne } from './single-input/card-one';
 import { CardTwo } from './single-input/card-two';
-import { AreaChartStacked } from './single-input/area-chart-stacked';
-import { BarChartMultiple } from './single-input/bar-chart-multiple';
+import { SemaphorAreaChart } from './single-input/semaphor-area-chart';
+import { SemaphorBarChart } from './single-input/semaphor-bar-chart';
+import { SemaphorLineChart } from './single-input/semaphor-line-chart';
 import { HorizontalBarChart } from './single-input/horizontal-bar-chart';
 import { DisplayCard } from './multi-input/display-card';
 
@@ -11,7 +12,8 @@ export {
   CardOne,
   CardTwo,
   DisplayCard,
-  AreaChartStacked,
-  BarChartMultiple,
+  SemaphorAreaChart,
+  SemaphorBarChart,
+  SemaphorLineChart,
   HorizontalBarChart,
 };

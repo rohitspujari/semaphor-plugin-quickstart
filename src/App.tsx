@@ -1,6 +1,7 @@
 // import { AreaChartStacked } from './components/single-input/area-chart-stacked';
+import { SemaphorLineChart } from './components/single-input/semaphor-line-chart';
 // import { BarChartMultiple } from './components/single-input/bar-chart-multiple';
-import { HorizontalBarChart } from './components/single-input/horizontal-bar-chart';
+// import { HorizontalBarChart } from './components/single-input/horizontal-bar-chart';
 
 export default function App() {
   const data = [
@@ -88,7 +89,9 @@ export default function App() {
   return (
     <div className="semaphor-custom ">
       {/* <div className="mx-10 p-10 size-96 bg-gray-100 rounded-lg"> */}
-      <HorizontalBarChart data={data} />
+      <div className="h-screen w-screen">
+        <SemaphorLineChart data={data} />
+      </div>
       {/* </div> */}
     </div>
   );

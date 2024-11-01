@@ -18,18 +18,18 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart';
+} from '@/components/ui-globals/semaphor-chart';
 import { ChartDataItem, generateChartConfig } from './chart-data-utils';
 import { CurveType } from 'recharts/types/shape/Curve';
 
 export const description = 'A stacked area chart';
 
-type AreaChartStackedProps = {
+type SemaphorAreaChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
 };
 
-export function AreaChartStacked({ data, settings }: AreaChartStackedProps) {
+export function SemaphorAreaChart({ data, settings }: SemaphorAreaChartProps) {
   if (!data || data?.length === 0) return null;
 
   const type = settings?.type || 'natural';

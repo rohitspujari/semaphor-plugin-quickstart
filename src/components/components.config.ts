@@ -11,8 +11,8 @@ export const config: ComponentsConfig = {
       component: 'CardTwo',
     },
     {
-      name: 'Area Chart Stacked',
-      component: 'AreaChartStacked',
+      name: 'Area Chart',
+      component: 'SemaphorAreaChart',
       settings: {
         type: {
           title: 'Type',
@@ -28,13 +28,30 @@ export const config: ComponentsConfig = {
       },
     },
     {
-      name: 'Bar Chart Multiple',
-      component: 'BarChartMultiple',
+      name: 'Bar Chart',
+      component: 'SemaphorBarChart',
       settings: {
         label: {
           title: 'Label',
           defaultValue: 'label',
           ui: 'input',
+        },
+      },
+    },
+    {
+      name: 'Line Chart',
+      component: 'SemaphorLineChart',
+      settings: {
+        type: {
+          title: 'Type',
+          defaultValue: 'natural',
+          ui: 'select',
+          options: [
+            { label: 'Natural', value: 'natural' },
+            { label: 'Step', value: 'step' },
+            { label: 'Linear', value: 'linear' },
+            { label: 'Basis', value: 'basis' },
+          ],
         },
       },
     },
