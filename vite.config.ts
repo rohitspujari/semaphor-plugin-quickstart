@@ -1,8 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import copy from 'rollup-plugin-copy'; // Im
+// import copy from 'rollup-plugin-copy'; // Im
 import path from 'path';
 import externalGlobals from 'rollup-plugin-external-globals';
+import fs from 'fs';
+
+import { config } from './src/components/components.config';
+
+function generateManifest() {
+  // Convert the config object directly to JSON
+  const jsonOutput = JSON.stringify(config, null, 2);
+
+  // Write manifest.json directly to dist after build
+  const distDir = path.resolve(__dirname, 'dist');
+  fs.writeFileSync(path.join(distDir, 'manifest.json'), jsonOutput, 'utf8');
+
+  console.log('manifest.json file created successfully.');
+}
 
 export default defineConfig(({ mode }) => ({
   define:
@@ -12,12 +26,18 @@ export default defineConfig(({ mode }) => ({
 
   plugins: [
     react(),
-    copy({
-      targets: [
-        { src: 'src/components/manifest.json', dest: 'dist' }, // Copy manifest.json to dist folder
-      ],
-      hook: 'writeBundle', // Hook to run the copy action after the bundle is written
-    }),
+    {
+      name: 'generate-manifest',
+      writeBundle() {
+        generateManifest(); // Runs after build completion
+      },
+    },
+    // copy({
+    //   targets: [
+    //     { src: 'src/components/manifest.json', dest: 'dist' }, // Copy manifest.json to dist folder
+    //   ],
+    //   hook: 'writeBundle', // Hook to run the copy action after the bundle is written
+    // }),
     mode === 'production' &&
       externalGlobals({
         react: 'React',
