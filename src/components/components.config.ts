@@ -59,5 +59,20 @@ export const config: ComponentsConfig = {
       name: 'Horizontal Bar Chart',
       component: 'HorizontalBarChart',
     },
+    {
+      name: 'Pie Chart',
+      component: 'SemaphorPieChart',
+    },
+    {
+      name: 'Donut Chart',
+      component: 'SemaphorDonutChart',
+      settings: {
+        label: {
+          title: 'Label',
+          defaultValue: 'Total',
+          ui: 'input',
+        },
+      },
+    },
   ],
 };
