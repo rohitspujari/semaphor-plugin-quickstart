@@ -18,6 +18,7 @@ export type ComponentsConfig = {
   visuals: {
     name: string;
     component: string;
+    icon?: string; // name of the icon (React Component) from lucide
     settings?: {
       [key: string]: {
         title: string;

@@ -9,6 +9,40 @@ export type ChartConfig = {
   };
 };
 
+export function generateChartConfigWithCustomColors(
+  data: ChartDataItem[],
+  skipIndices: number[] = [],
+  colors: string[]
+): {
+  chartConfig: ChartConfig;
+  keys: string[];
+} {
+  // Find the object with the most keys
+  const objectWithMostKeys = data.reduce(
+    (max, current) =>
+      Object.keys(current).length > Object.keys(max).length ? current : max,
+    {} as ChartDataItem
+  );
+
+  const config: ChartConfig = {};
+  let colorIndex = 0;
+  const maxColorIndex = colors.length;
+
+  // Get all keys and filter by index
+  Object.keys(objectWithMostKeys).forEach((key, index) => {
+    if (!skipIndices.includes(index)) {
+      config[key] = {
+        label: key?.charAt(0)?.toUpperCase() + key?.slice(1),
+        color: colors[colorIndex],
+      };
+      // Increment colorIndex and reset to 1 if it exceeds maxColorIndex
+      colorIndex = colorIndex === maxColorIndex ? 1 : colorIndex + 1;
+    }
+  });
+
+  return { chartConfig: config, keys: Object.keys(objectWithMostKeys) };
+}
+
 export function generateChartConfig(
   data: ChartDataItem[],
   skipIndices: number[] = []

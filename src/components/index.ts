@@ -7,6 +7,7 @@ import { HorizontalBarChart } from './single-input/horizontal-bar-chart';
 import { SemaphorPieChart } from './single-input/semaphor-pie-chart';
 import { SemaphorDonutChart } from './single-input/semaphor-donut-chart';
 import { DisplayCard } from './multi-input/display-card';
+import { RecentSales } from './single-input/recent-sales-card';
 
 import '../index.css';
 
@@ -20,4 +21,5 @@ export {
   HorizontalBarChart,
   SemaphorPieChart,
   SemaphorDonutChart,
+  RecentSales,
 };

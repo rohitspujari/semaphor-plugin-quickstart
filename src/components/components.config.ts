@@ -11,6 +11,11 @@ export const config: ComponentsConfig = {
       component: 'CardTwo',
     },
     {
+      name: 'Recent Sales',
+      icon: 'Table2',
+      component: 'RecentSales',
+    },
+    {
       name: 'Area Chart',
       component: 'SemaphorAreaChart',
       settings: {

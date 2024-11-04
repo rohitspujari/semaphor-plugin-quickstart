@@ -26,23 +26,35 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { ChartDataItem, generateChartConfig } from './chart-data-utils';
+import {
+  ChartDataItem,
+  //   generateChartConfig,
+  generateChartConfigWithCustomColors,
+} from './chart-data-utils';
 
 export const description = 'A stacked area chart';
 
 type HorizontalBarChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
+  theme?: {
+    colors: string[];
+  };
 };
 
-export function HorizontalBarChart({ data }: HorizontalBarChartProps) {
+export function HorizontalBarChart({ data, theme }: HorizontalBarChartProps) {
   if (!data || data?.length === 0) return null;
 
   //   const type = settings?.type || 'natural';
 
   console.log(data, 'data');
 
-  const { chartConfig, keys } = generateChartConfig(data, [0]);
+  //   const { chartConfig, keys } = generateChartConfig(data, [0]);
+  const { chartConfig, keys } = generateChartConfigWithCustomColors(
+    data,
+    [0],
+    theme?.colors || []
+  );
 
   // console.log(data, 'data');
 

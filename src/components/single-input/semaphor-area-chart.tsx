@@ -19,26 +19,41 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui-globals/semaphor-chart';
-import { ChartDataItem, generateChartConfig } from './chart-data-utils';
+import {
+  ChartDataItem,
+  generateChartConfigWithCustomColors,
+} from './chart-data-utils';
 import { CurveType } from 'recharts/types/shape/Curve';
 
 export const description = 'A stacked area chart';
 
 type SemaphorAreaChartProps = {
   data?: ChartDataItem[];
+  theme?: {
+    colors: string[];
+  };
   settings?: Record<string, string | number | boolean>;
 };
 
-export function SemaphorAreaChart({ data, settings }: SemaphorAreaChartProps) {
+export function SemaphorAreaChart({
+  data,
+  theme,
+  settings,
+}: SemaphorAreaChartProps) {
   if (!data || data?.length === 0) return null;
 
   const type = settings?.type || 'natural';
 
   console.log(data, 'data');
 
-  const { chartConfig, keys } = generateChartConfig(data, [0]);
+  // const { chartConfig, keys } = generateChartConfig(data, [0]);
+  const { chartConfig, keys } = generateChartConfigWithCustomColors(
+    data,
+    [0],
+    theme?.colors || []
+  );
 
-  // console.log(data, 'data');
+  console.log(theme, 'theme');
 
   function renderChartContainer() {
     return (

@@ -1,6 +1,7 @@
 // import { AreaChartStacked } from './components/single-input/area-chart-stacked';
 // import { SemaphorLineChart } from './components/single-input/semaphor-line-chart';
 // import { SemaphorPieChart } from './components/single-input/semaphor-pie-chart';
+import { RecentSales } from './components/single-input/recent-sales-card';
 import { SemaphorDonutChart } from './components/single-input/semaphor-donut-chart';
 // import { BarChartMultiple } from './components/single-input/bar-chart-multiple';
 // import { HorizontalBarChart } from './components/single-input/horizontal-bar-chart';
@@ -93,6 +94,7 @@ export default function App() {
       {/* <div className="mx-10 p-10 size-96 bg-gray-100 rounded-lg"> */}
       <div className="h-screen w-screen">
         <SemaphorDonutChart data={data} />
+        <RecentSales data={data} />
       </div>
       {/* </div> */}
     </div>

@@ -25,23 +25,35 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui-globals/semaphor-chart';
-import { ChartDataItem, generateChartConfig } from './chart-data-utils';
+import {
+  ChartDataItem,
+  // generateChartConfig,
+  generateChartConfigWithCustomColors,
+} from './chart-data-utils';
 
 export const description = 'A stacked area chart';
 
 type SemaphorBarChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
+  theme?: {
+    colors: string[];
+  };
 };
 
-export function SemaphorBarChart({ data }: SemaphorBarChartProps) {
+export function SemaphorBarChart({ data, theme }: SemaphorBarChartProps) {
   if (!data || data?.length === 0) return null;
 
   //   const type = settings?.type || 'natural';
 
   console.log(data, 'data');
 
-  const { chartConfig, keys } = generateChartConfig(data, [0]);
+  // const { chartConfig, keys } = generateChartConfig(data, [0]);
+  const { chartConfig, keys } = generateChartConfigWithCustomColors(
+    data,
+    [0],
+    theme?.colors || []
+  );
 
   // console.log(data, 'data');
 
