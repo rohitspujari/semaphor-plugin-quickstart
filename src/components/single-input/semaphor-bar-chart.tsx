@@ -29,7 +29,7 @@ import {
   ChartDataItem,
   // generateChartConfig,
   generateChartConfigWithCustomColors,
-} from './chart-data-utils';
+} from '../../utils/chart-data-utils';
 
 export const description = 'A stacked area chart';
 

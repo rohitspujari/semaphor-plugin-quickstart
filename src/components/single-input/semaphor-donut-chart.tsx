@@ -18,19 +18,23 @@ import {
 } from '@/components/ui-globals/semaphor-chart';
 import {
   ChartDataItem,
-  generateChartConfigForPieChart,
+  generateChartConfigForPieChartWithCustomColors,
   getKeys,
-} from './chart-data-utils';
+} from '../../utils/chart-data-utils';
 import { useMemo } from 'react';
 
 type SemaphorDonutChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
+  theme?: {
+    colors: string[];
+  };
 };
 
 export function SemaphorDonutChart({
   data,
   settings,
+  theme,
 }: SemaphorDonutChartProps) {
   const keys = getKeys(data || []);
   const total = useMemo(() => {
@@ -46,8 +50,11 @@ export function SemaphorDonutChart({
 
   const label = settings?.label || 'Total';
 
-  const { chartConfig } = generateChartConfigForPieChart(data);
-  console.log(chartConfig, 'chartConfig');
+  const { chartConfig } = generateChartConfigForPieChartWithCustomColors(
+    data,
+    theme?.colors || []
+  );
+  //   console.log(chartConfig, 'chartConfig');
 
   // add fill property to data
   const dataWithFill = data.map((item, i) => {

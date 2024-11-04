@@ -18,7 +18,7 @@ import {
 import {
   ChartDataItem,
   generateChartConfigForPieChart,
-} from './chart-data-utils';
+} from '../../utils/chart-data-utils';
 
 type SemaphorPieChartProps = {
   data?: ChartDataItem[];

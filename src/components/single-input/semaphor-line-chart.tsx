@@ -25,7 +25,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui-globals/semaphor-chart';
-import { ChartDataItem, generateChartConfig } from './chart-data-utils';
+import {
+  ChartDataItem,
+  generateChartConfigWithCustomColors,
+} from '../../utils/chart-data-utils';
 import { CurveType } from 'recharts/types/shape/Curve';
 
 export const description = 'A stacked area chart';
@@ -33,16 +36,28 @@ export const description = 'A stacked area chart';
 type SemaphorLineChartProps = {
   data?: ChartDataItem[];
   settings?: Record<string, string | number | boolean>;
+  theme?: {
+    colors: string[];
+  };
 };
 
-export function SemaphorLineChart({ data, settings }: SemaphorLineChartProps) {
+export function SemaphorLineChart({
+  data,
+  settings,
+  theme,
+}: SemaphorLineChartProps) {
   if (!data || data?.length === 0) return null;
 
   const type = settings?.type || 'natural';
 
   console.log(data, 'data');
 
-  const { chartConfig, keys } = generateChartConfig(data, [0]);
+  // const { chartConfig, keys } = generateChartConfig(data, [0]);
+  const { chartConfig, keys } = generateChartConfigWithCustomColors(
+    data,
+    [0],
+    theme?.colors || []
+  );
 
   // console.log(data, 'data');
 
