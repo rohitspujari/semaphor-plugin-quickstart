@@ -3,14 +3,14 @@ import { ComponentsConfig } from './types';
 export const config: ComponentsConfig = {
   visuals: [
     {
-      name: 'Recent Sales',
+      name: 'Recent Sales', // Name of the component
       icon: 'Table2',
       component: 'RecentSales',
       settings: {
         label: {
-          title: 'Label',
-          defaultValue: 'label',
-          ui: 'input',
+          title: 'Label', // Label for the component
+          defaultValue: 'my label', // Default value for the label
+          ui: 'input', // UI for the label
         },
       },
     },
