@@ -6,6 +6,7 @@ export function RecentSales({ data, settings }: SingleInputVisualProps) {
   // get the column keys of the data
   const keys = Object.keys(data[0]);
 
+  // get the label from the settings
   const label = settings?.['label'] || 'Recent Sales';
 
   // calculate the total sales
