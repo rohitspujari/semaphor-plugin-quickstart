@@ -1,10 +1,12 @@
 import { SingleInputVisualProps } from '../types';
 
-export function RecentSales({ data }: SingleInputVisualProps) {
+export function RecentSales({ data, settings }: SingleInputVisualProps) {
   if (!data || data?.length === 0) return null;
 
   // get the column keys of the data
   const keys = Object.keys(data[0]);
+
+  const label = settings?.['label'] || 'Recent Sales';
 
   // calculate the total sales
   const totalSales = data.reduce(
@@ -18,7 +20,7 @@ export function RecentSales({ data }: SingleInputVisualProps) {
 
   return (
     <div className="px-4 bg-background rounded-lg">
-      <h2 className="text-lg font-semibold">Recent Sales</h2>
+      <h2 className="text-lg font-semibold">{label}</h2>
       <p className="text-sm text-muted-foreground mb-4">
         You made {formattedTotalSales} sales this month.
       </p>
