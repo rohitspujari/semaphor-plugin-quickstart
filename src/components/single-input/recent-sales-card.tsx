@@ -21,7 +21,10 @@ export function RecentSales({ data }: SingleInputVisualProps) {
 
   const records = data || sampleData;
 
+  // get the column keys of the data
   const keys = Object.keys(data[0]);
+
+  // calculate the total sales
   const totalSales = data.reduce(
     (acc, record) => acc + Number(record?.[keys[2]]),
     0
