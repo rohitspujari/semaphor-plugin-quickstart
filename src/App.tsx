@@ -1,10 +1,4 @@
-// import { AreaChartStacked } from './components/single-input/area-chart-stacked';
-// import { SemaphorLineChart } from './components/single-input/semaphor-line-chart';
-// import { SemaphorPieChart } from './components/single-input/semaphor-pie-chart';
-import { RecentSales } from './components/single-input/recent-sales-card';
-// import { SemaphorDonutChart } from './components/single-input/semaphor-donut-chart';
-// import { BarChartMultiple } from './components/single-input/bar-chart-multiple';
-// import { HorizontalBarChart } from './components/single-input/horizontal-bar-chart';
+import { RecentSales } from './components/semaphor-components/recent-sales-card';
 
 export default function App() {
   const data = [
@@ -80,23 +74,12 @@ export default function App() {
     },
   ];
 
-  // const data = [
-  //   { month: 'January', desktop: 186, mobile: 80, vr: 13.3 },
-  //   { month: 'February', desktop: 305, mobile: 200, vr: 22 },
-  //   { month: 'March', desktop: 237, mobile: 120, vr: 22 },
-  //   { month: 'April', desktop: 73, mobile: 190, vr: 22 },
-  //   { month: 'May', desktop: 209, mobile: 130, vr: 22 },
-  //   { month: 'June', desktop: 214, mobile: 140, vr: 22 },
-  //   { month: 'July', desktop: 214, mobile: 140, vr: 22 },
-  // ];
   return (
     <div className="semaphor-custom ">
-      {/* <div className="mx-10 p-10 size-96 bg-gray-100 rounded-lg"> */}
+      {/* semaphor-custom class is required for styles to work during development */}
       <div className="w-[600px] h-[700px] mx-auto outline overflow-y-auto">
-        {/* <SemaphorDonutChart data={data} /> */}
         <RecentSales data={data} />
       </div>
-      {/* </div> */}
     </div>
   );
 }
