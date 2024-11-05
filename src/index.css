@@ -30,13 +30,13 @@
     --semaphor-custom-radius: 0.5rem;
   }
   .dark {
-    --semaphor-custom-background: 240 10% 3.9%;
-    --semaphor-custom-foreground: 0 0% 98%;
-    --semaphor-custom-card: 240 10% 3.9%;
-    --semaphor-custom-card-foreground: 0 0% 98%;
-    --semaphor-custom-popover: 240 10% 3.9%;
+    --semaphor-custom-background: 240 10% 10%;
+    --semaphor-custom-foreground: 0 0% 80%;
+    --semaphor-custom-card: 240 10% 10%;
+    --semaphor-custom-card-foreground: 0 0% 80%;
+    --semaphor-custom-popover: 240 10% 10%;
     --semaphor-custom-popover-foreground: 0 0% 98%;
-    --semaphor-custom-primary: 0 0% 98%;
+    --semaphor-custom-primary: 0 0% 90%;
     --semaphor-custom-primary-foreground: 240 5.9% 10%;
     --semaphor-custom-secondary: 240 3.7% 15.9%;
     --semaphor-custom-secondary-foreground: 0 0% 98%;
