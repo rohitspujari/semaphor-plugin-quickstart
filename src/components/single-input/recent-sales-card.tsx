@@ -35,16 +35,16 @@ export function RecentSales({ data }: SingleInputVisualProps) {
     .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   return (
-    <div className="p-4 bg-background rounded-lg shadow-md">
+    <div className="px-4 bg-background rounded-lg">
       <h2 className="text-lg font-semibold">Recent Sales</h2>
       <p className="text-sm text-muted-foreground mb-4">
         You made {formattedTotalSales} sales this month.
       </p>
-      <ul>
+      <ul className="p-0">
         {records.map((record, index) => (
           <li
             key={index}
-            className="flex items-center justify-between py-2 border-b border-muted last:border-none"
+            className=" flex items-center justify-between py-2 border-b border-muted last:border-none"
           >
             <div className="flex items-center">
               <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-black font-bold">

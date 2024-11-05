@@ -2,24 +2,24 @@ import { ComponentsConfig } from './types';
 
 export const config: ComponentsConfig = {
   visuals: [
-    {
-      name: 'Card One',
-      component: 'CardOne',
-    },
-    {
-      name: 'Card Two',
-      component: 'CardTwo',
-    },
-    {
-      name: 'Display Card',
-      component: 'DisplayCard',
-      dataInputs: ['Chart Data', 'Table Data', 'KPI Data'],
-    },
-    {
-      name: 'Recent Sales',
-      icon: 'Table2',
-      component: 'RecentSales',
-    },
+    // {
+    //   name: 'Card One',
+    //   component: 'CardOne',
+    // },
+    // {
+    //   name: 'Card Two',
+    //   component: 'CardTwo',
+    // },
+    // {
+    //   name: 'Display Card',
+    //   component: 'DisplayCard',
+    //   dataInputs: ['Chart Data', 'Table Data', 'KPI Data'],
+    // },
+    // {
+    //   name: 'Recent Sales',
+    //   icon: 'Table2',
+    //   component: 'RecentSales',
+    // },
     {
       name: 'Area Chart',
       component: 'SemaphorAreaChart',
@@ -32,7 +32,7 @@ export const config: ComponentsConfig = {
             { label: 'Natural', value: 'natural' },
             { label: 'Step', value: 'step' },
             { label: 'Linear', value: 'linear' },
-            { label: 'Basis', value: 'basis' },
+            // { label: 'Basis', value: 'basis' },
           ],
         },
       },
@@ -60,19 +60,19 @@ export const config: ComponentsConfig = {
             { label: 'Natural', value: 'natural' },
             { label: 'Step', value: 'step' },
             { label: 'Linear', value: 'linear' },
-            { label: 'Basis', value: 'basis' },
+            // { label: 'Basis', value: 'basis' },
           ],
         },
       },
     },
-    {
-      name: 'Horizontal Bar Chart',
-      component: 'HorizontalBarChart',
-    },
-    {
-      name: 'Pie Chart',
-      component: 'SemaphorPieChart',
-    },
+    // {
+    //   name: 'Horizontal Bar Chart',
+    //   component: 'HorizontalBarChart',
+    // },
+    // {
+    //   name: 'Pie Chart',
+    //   component: 'SemaphorPieChart',
+    // },
     {
       name: 'Donut Chart',
       component: 'SemaphorDonutChart',

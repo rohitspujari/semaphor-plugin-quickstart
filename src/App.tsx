@@ -2,7 +2,7 @@
 // import { SemaphorLineChart } from './components/single-input/semaphor-line-chart';
 // import { SemaphorPieChart } from './components/single-input/semaphor-pie-chart';
 import { RecentSales } from './components/single-input/recent-sales-card';
-import { SemaphorDonutChart } from './components/single-input/semaphor-donut-chart';
+// import { SemaphorDonutChart } from './components/single-input/semaphor-donut-chart';
 // import { BarChartMultiple } from './components/single-input/bar-chart-multiple';
 // import { HorizontalBarChart } from './components/single-input/horizontal-bar-chart';
 
@@ -11,7 +11,7 @@ export default function App() {
     {
       'customer_name': 'Aaron Hawkins',
       'count': 4,
-      'avg_sales': 77.8555,
+      'avg_sales': 77.85,
       'max_discount': 0,
       'sum_quantity': 17,
     },
@@ -25,21 +25,21 @@ export default function App() {
     {
       'customer_name': 'Adam Bellavance',
       'count': 5,
-      'avg_sales': 887.7376,
+      'avg_sales': 887.73,
       'max_discount': 0,
       'sum_quantity': 12,
     },
     {
       'customer_name': 'Adam Hart',
       'count': 1,
-      'avg_sales': 841.568,
+      'avg_sales': 841.56,
       'max_discount': 0,
       'sum_quantity': 2,
     },
     {
       'customer_name': 'Adam Shillingsburg',
       'count': 7,
-      'avg_sales': 181.4662857142857,
+      'avg_sales': 181.46,
       'max_discount': 0,
       'sum_quantity': 25,
     },
@@ -60,7 +60,7 @@ export default function App() {
     {
       'customer_name': 'Aimee Bixby',
       'count': 6,
-      'avg_sales': 132.92033333333333,
+      'avg_sales': 132.92,
       'max_discount': 0,
       'sum_quantity': 20,
     },
@@ -74,7 +74,7 @@ export default function App() {
     {
       'customer_name': 'Alan Haines',
       'count': 2,
-      'avg_sales': 14.208,
+      'avg_sales': 14.2,
       'max_discount': 0,
       'sum_quantity': 5,
     },
@@ -92,8 +92,8 @@ export default function App() {
   return (
     <div className="semaphor-custom ">
       {/* <div className="mx-10 p-10 size-96 bg-gray-100 rounded-lg"> */}
-      <div className="h-screen w-screen">
-        <SemaphorDonutChart data={data} />
+      <div className="w-[600px] h-[700px] mx-auto outline overflow-y-auto">
+        {/* <SemaphorDonutChart data={data} /> */}
         <RecentSales data={data} />
       </div>
       {/* </div> */}
