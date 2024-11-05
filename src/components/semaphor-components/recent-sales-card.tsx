@@ -1,25 +1,7 @@
 import { SingleInputVisualProps } from '../types';
 
-const sampleData: Record<string, string | number>[] = [
-  {
-    name: 'Olivia Martin',
-    email: 'olivia.martin@email.com',
-    amount: 1999,
-  },
-  { name: 'Jackson Lee', email: 'jackson.lee@email.com', amount: 39 },
-  {
-    name: 'Isabella Nguyen',
-    email: 'isabella.nguyen@email.com',
-    amount: 299,
-  },
-  { name: 'William Kim', email: 'will@email.com', amount: 99 },
-  { name: 'Sofia Davis', email: 'sofia.davis@email.com', amount: 39 },
-];
-
 export function RecentSales({ data }: SingleInputVisualProps) {
   if (!data || data?.length === 0) return null;
-
-  const records = data || sampleData;
 
   // get the column keys of the data
   const keys = Object.keys(data[0]);
@@ -41,7 +23,7 @@ export function RecentSales({ data }: SingleInputVisualProps) {
         You made {formattedTotalSales} sales this month.
       </p>
       <ul className="p-0">
-        {records.map((record, index) => (
+        {data.map((record, index) => (
           <li
             key={index}
             className=" flex items-center justify-between py-2 border-b border-muted last:border-none"
