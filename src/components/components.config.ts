@@ -11,6 +11,11 @@ export const config: ComponentsConfig = {
       component: 'CardTwo',
     },
     {
+      name: 'Display Card',
+      component: 'DisplayCard',
+      dataInputs: ['Chart Data', 'Table Data', 'KPI Data'],
+    },
+    {
       name: 'Recent Sales',
       icon: 'Table2',
       component: 'RecentSales',

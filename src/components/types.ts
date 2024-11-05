@@ -19,6 +19,7 @@ export type ComponentsConfig = {
     name: string;
     component: string;
     icon?: string; // name of the icon (React Component) from lucide
+    dataInputs?: string[];
     settings?: {
       [key: string]: {
         title: string;
