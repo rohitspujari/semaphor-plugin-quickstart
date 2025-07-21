@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import copy from 'rollup-plugin-copy'; // Im
 import path from 'path';
 import externalGlobals from 'rollup-plugin-external-globals';
 import fs from 'fs';
+import type { OutputBundle, OutputChunk } from 'rollup';
 
 import { config } from './src/components/components.config';
 
@@ -18,6 +18,50 @@ function generateManifest() {
   console.log('manifest.json file created successfully.');
 }
 
+// Custom plugin to inject CSS as a string
+function injectCSSPlugin() {
+  return {
+    name: 'inject-css',
+    writeBundle(_options: unknown, bundle: OutputBundle) {
+      // Check if CSS file exists in dist
+      const cssPath = path.resolve(__dirname, 'dist/style.css');
+      if (fs.existsSync(cssPath)) {
+        // Read the CSS content
+        const cssContent = fs.readFileSync(cssPath, 'utf8');
+
+        // Create CSS injection code
+        const cssInjectionCode = `
+// Injected CSS
+const style = document.createElement('style');
+style.textContent = ${JSON.stringify(cssContent)};
+document.head.appendChild(style);
+`;
+
+        // Find the main JS file in the bundle
+        const mainFile = Object.values(bundle).find(
+          (file): file is OutputChunk =>
+            file.type === 'chunk' && file.fileName === 'index.js'
+        );
+
+        if (mainFile) {
+          // Read the current JS file content
+          const jsPath = path.resolve(__dirname, 'dist/index.js');
+          const jsContent = fs.readFileSync(jsPath, 'utf8');
+
+          // Prepend CSS injection code
+          const newContent = cssInjectionCode + '\n' + jsContent;
+
+          // Write back to file
+          fs.writeFileSync(jsPath, newContent, 'utf8');
+
+          // Remove the CSS file
+          fs.unlinkSync(cssPath);
+        }
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
   define:
     mode === 'production'
@@ -26,48 +70,58 @@ export default defineConfig(({ mode }) => ({
 
   plugins: [
     react(),
+    injectCSSPlugin(),
     {
       name: 'generate-manifest',
       writeBundle() {
         generateManifest(); // Runs after build completion
       },
     },
-    // copy({
-    //   targets: [
-    //     { src: 'src/components/manifest.json', dest: 'dist' }, // Copy manifest.json to dist folder
-    //   ],
-    //   hook: 'writeBundle', // Hook to run the copy action after the bundle is written
-    // }),
     mode === 'production' &&
       externalGlobals({
         react: 'React',
         'react-dom': 'ReactDOM',
+        'react/jsx-runtime': 'React',
       }),
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'react/jsx-runtime': path.resolve(
+        __dirname,
+        'node_modules/react/jsx-runtime.js'
+      ),
     },
   },
+
   build: {
+    // sourcemap: true,
     cssCodeSplit: false, // Inline CSS into the JavaScript bundle
+    cssMinify: true, // Minify CSS
     lib: {
-      entry: './src/components/index.ts', // Your entry point exporting all components
-      name: 'MyLibrary',
-      fileName: () => `index.js`,
-      formats: ['es'], // Use ES modules for dynamic imports
+      entry: {
+        main: path.resolve(__dirname, 'src/components/index.ts'),
+      },
+      formats: ['es'],
+      fileName: (format, entryName) => {
+        if (entryName === 'main') {
+          return format === 'es' ? 'index.js' : 'index.cjs';
+        }
+        return format === 'es'
+          ? `${entryName}/index.js`
+          : `${entryName}/index.cjs`;
+      },
     },
     rollupOptions: {
-      external: ['react', 'react-dom'], //['react', 'react-dom'],
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         exports: 'named', // Use named exports for easier access
         globals: {
-          react: 'React',
+          'react': 'React',
           'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'React',
         },
       },
     },
   },
 }));
-
-// After 10/30/2024, I'm going to try to use the new Vite config syntax.

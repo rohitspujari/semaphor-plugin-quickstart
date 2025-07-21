@@ -1,11 +1,12 @@
-import { ComponentsConfig } from './types';
+import { ComponentsConfig } from './config-types';
 
 export const config: ComponentsConfig = {
   visuals: [
     {
-      name: 'Recent Sales', // Name of the component
-      icon: 'Table2',
-      component: 'RecentSales',
+      name: 'My New Table', // Name of the component,
+      component: 'MyTable',
+      componentType: 'chart',
+      chartType: 'table',
       settings: {
         label: {
           title: 'Label', // Label for the component

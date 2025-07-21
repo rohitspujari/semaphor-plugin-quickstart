@@ -1,4 +1,4 @@
-import { RecentSales } from './components/semaphor-components/recent-sales-card';
+import { MyTable } from './components/semaphor-components/my-table';
 
 export default function App() {
   const data = [
@@ -74,12 +74,19 @@ export default function App() {
     },
   ];
 
+  // return (
+  //   <div className="semaphor-custom ">
+  //     {/* semaphor-custom class is required for styles to work during development */}
+  //     <div className="w-[600px] h-[700px] mx-auto outline overflow-y-auto">
+  //       <MyTable data={data} />
+  //     </div>
+  //   </div>
+  // );
   return (
-    <div className="semaphor-custom ">
-      {/* semaphor-custom class is required for styles to work during development */}
-      <div className="w-[600px] h-[700px] mx-auto outline overflow-y-auto">
-        <RecentSales data={data} />
-      </div>
+    // <div className="semaphor-custom ">
+    <div className="w-[600px] h-[700px] mx-auto mt-10 border border-border rounded-lg px-4 py-6 overflow-y-auto">
+      <MyTable data={data} />
     </div>
+    // </div>
   );
 }

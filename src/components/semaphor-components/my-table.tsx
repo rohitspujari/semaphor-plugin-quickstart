@@ -1,13 +1,13 @@
-import { SingleInputVisualProps } from '../types';
+import { SingleInputVisualProps } from '../config-types';
 
-export function RecentSales({ data, settings }: SingleInputVisualProps) {
+export function MyTable({ data, settings }: SingleInputVisualProps) {
   if (!data || data?.length === 0) return null;
 
   // get the column keys of the data
   const keys = Object.keys(data[0]);
 
   // get the label from the settings
-  const label = settings?.['label'] || 'Recent Sales';
+  const label = settings?.['label'] || 'My Sales Table';
 
   // calculate the total sales
   const totalSales = data.reduce(

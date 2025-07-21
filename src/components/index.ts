@@ -1,5 +1,5 @@
-import { RecentSales } from './semaphor-components/recent-sales-card';
+import { MyTable } from './semaphor-components/my-table';
 
 import '../index.css';
 
-export { RecentSales };
+export { MyTable };
