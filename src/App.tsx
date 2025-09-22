@@ -1,7 +1,8 @@
 import { MyTable } from './components/semaphor-components/my-table';
+import { MonthOverMonthTable } from './components/semaphor-components/month-over-month-table';
 
 export default function App() {
-  const data = [
+  const myTableData = [
     {
       'customer_name': 'Aaron Hawkins',
       'count': 4,
@@ -74,19 +75,217 @@ export default function App() {
     },
   ];
 
-  // return (
-  //   <div className="semaphor-custom ">
-  //     {/* semaphor-custom class is required for styles to work during development */}
-  //     <div className="w-[600px] h-[700px] mx-auto outline overflow-y-auto">
-  //       <MyTable data={data} />
-  //     </div>
-  //   </div>
-  // );
+  const monthOverMonthData = [
+    {
+      region: "Total US",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: -0.92,
+      nov2024: 350.202,
+      nov2024_change: -0.92,
+      yoy: 350.202,
+      yoy_change: -0.92,
+    },
+    {
+      region: "North",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Bundles",
+      category: "commodity",
+      parent: "North",
+      level: 1,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Busheling/Clips",
+      category: "commodity",
+      parent: "North",
+      level: 1,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Cast Iron",
+      category: "commodity",
+      parent: "North",
+      level: 1,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Heavy Melting Steel",
+      category: "commodity",
+      parent: "North",
+      level: 1,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Total steel",
+      category: "commodity",
+      parent: "North",
+      level: 1,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Northeast",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "North Midwest",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "North Central",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "South",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+    {
+      region: "Southeast",
+      category: "region",
+      level: 0,
+      feb2025: 350.202,
+      feb2025_change: 0.92,
+      jan2025: 350.202,
+      jan2025_change: -0.92,
+      dec2024: 350.202,
+      dec2024_change: 0.92,
+      nov2024: 350.202,
+      nov2024_change: 0.92,
+      yoy: 350.202,
+      yoy_change: 0.92,
+    },
+  ];
+
   return (
-    // <div className="semaphor-custom ">
-    <div className="w-[600px] h-[700px] mx-auto mt-10 border border-border rounded-lg px-4 py-6 overflow-y-auto">
-      <MyTable data={data} />
+    <div className="semaphor-custom">
+      <div className="container mx-auto py-10 space-y-8">
+        {/* Month-over-Month Table */}
+        <div className="w-full max-w-7xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Month-over-Month Table Component</h2>
+          <MonthOverMonthTable
+            data={monthOverMonthData}
+            settings={{
+              title: "Industry commodity index trends by region",
+              subtitle: "Davis Insight weighted index changes by region for selected commodities"
+            }}
+          />
+        </div>
+
+        {/* Original My Table */}
+        <div className="w-[600px] mx-auto">
+          <h2 className="text-2xl font-bold mb-4">My Table Component</h2>
+          <div className="border border-border rounded-lg px-4 py-6 overflow-y-auto">
+            <MyTable data={myTableData} />
+          </div>
+        </div>
+      </div>
     </div>
-    // </div>
   );
 }

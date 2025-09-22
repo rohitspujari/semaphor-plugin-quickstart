@@ -15,5 +15,24 @@ export const config: ComponentsConfig = {
         },
       },
     },
+    {
+      name: 'Month-over-Month Table',
+      component: 'MonthOverMonthTable',
+      componentType: 'chart',
+      chartType: 'table',
+      icon: 'Table2',
+      settings: {
+        title: {
+          title: 'Title',
+          defaultValue: 'Industry commodity index trends by region',
+          ui: 'input',
+        },
+        subtitle: {
+          title: 'Subtitle',
+          defaultValue: 'Davis Insight weighted index changes by region for selected commodities',
+          ui: 'input',
+        },
+      },
+    },
   ],
 };
