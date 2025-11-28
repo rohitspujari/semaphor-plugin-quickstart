@@ -7,7 +7,7 @@ export function MyTable({ data, settings }: SingleInputVisualProps) {
   const keys = Object.keys(data[0]);
 
   // get the label from the settings
-  const label = settings?.['label'] || 'My Sales Table';
+  const label = settings?.['label'] || 'Custom Sales Table';
 
   // calculate the total sales
   const totalSales = data.reduce(
@@ -23,7 +23,7 @@ export function MyTable({ data, settings }: SingleInputVisualProps) {
     <div className="px-4 bg-background rounded-lg">
       <h2 className="text-lg font-semibold">{label}</h2>
       <p className="text-sm text-muted-foreground mb-4">
-        You made {formattedTotalSales} sales this month.
+        {formattedTotalSales} sales this month.
       </p>
       <ul className="p-0">
         {data.map((record, index) => (
