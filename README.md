@@ -937,7 +937,12 @@ type TSelectedRecord = {
 
 ## Working with Inline Filters
 
-Inline filters allow users to filter data directly within your visual, rather than from a separate filter bar.
+Inline filters are filter controls that appear directly inside your visual card. Unlike global dashboard filters that affect all cards, inline filters let users filter data for just that specific card—perfect for self-contained, interactive visuals.
+
+**Use cases:**
+- A sales table with region and product filters built into the header
+- A chart with a date range selector above the visualization
+- A KPI card with a category toggle
 
 ### How Inline Filters Work
 
