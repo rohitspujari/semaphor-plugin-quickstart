@@ -1,4 +1,4 @@
-import { SingleInputVisualProps } from '../config-types';
+import { SingleInputVisualProps } from '../../config-types';
 
 export function MyTable({ data, settings }: SingleInputVisualProps) {
   if (!data || data?.length === 0) return null;
