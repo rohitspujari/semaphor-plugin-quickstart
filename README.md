@@ -935,16 +935,20 @@ type TSelectedRecord = {
 
 ---
 
-## Working with Inline Filters
+## Rendering Inline Filters in Your Custom Components
 
-Inline filters are filter controls that appear directly inside your visual card. Unlike global dashboard filters that affect all cards, inline filters let users filter data for just that specific card—perfect for self-contained, interactive visuals.
+When building custom visuals, you may want to include filter controls directly inside your component. Semaphor supports this through **inline filters**—filter controls that appear inside the visual card itself, allowing users to filter data for just that specific card.
 
-**Use cases:**
-- A sales table with region and product filters built into the header
-- A chart with a date range selector above the visualization
-- A KPI card with a category toggle
+Even better, these inline filters can use your own custom filter components (like the ChipFilter example earlier), giving you a fully customized experience—custom visuals with custom filters, all working together.
 
-### How Inline Filters Work
+**Why inline filters?**
+- **Self-contained visuals** — Users can interact with filters without leaving the card
+- **Card-specific filtering** — Unlike global dashboard filters, inline filters only affect the card they're in
+- **Flexible placement** — You decide where filters appear in your layout (header, sidebar, etc.)
+
+Semaphor passes pre-rendered filter components to your visual via the `inlineFilters` prop. Your job is simply to render them wherever you want.
+
+### How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
