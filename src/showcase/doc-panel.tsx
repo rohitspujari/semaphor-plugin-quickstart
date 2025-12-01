@@ -41,10 +41,43 @@ type DocPanelProps = {
     supportedDataTypes?: string[];
   };
   componentType: 'visuals' | 'filters';
+  sampleData?: Record<string, unknown>[];
 };
 
-export function DocPanel({ component, componentType }: DocPanelProps) {
+export function DocPanel({ component, componentType, sampleData }: DocPanelProps) {
   const { docs, settings } = component;
+
+  // Render sample data as a scrollable table
+  const renderSampleDataTable = () => {
+    if (!sampleData || sampleData.length === 0) return null;
+    const columns = Object.keys(sampleData[0]);
+    return (
+      <div className="max-h-48 overflow-auto rounded-md border border-border">
+        <table className="w-full text-sm border-collapse">
+          <thead className="bg-muted sticky top-0">
+            <tr>
+              {columns.map((col) => (
+                <th key={col} className="border-b border-border px-3 py-2 text-left font-medium">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sampleData.map((row, i) => (
+              <tr key={i} className="hover:bg-muted/50">
+                {columns.map((col) => (
+                  <td key={col} className="border-b border-border px-3 py-2">
+                    {String(row[col])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -69,6 +102,14 @@ export function DocPanel({ component, componentType }: DocPanelProps) {
                 <li key={i}>{uc}</li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {/* Sample Data (visuals only) */}
+        {componentType === 'visuals' && sampleData && sampleData.length > 0 && (
+          <section>
+            <h4 className="font-medium mb-2">Sample Data</h4>
+            {renderSampleDataTable()}
           </section>
         )}
 

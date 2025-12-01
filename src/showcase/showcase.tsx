@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { config } from '../components/components.config';
 import { ComponentCard } from './component-card';
 import { DocPanel } from './doc-panel';
+import { sampleDataRegistry } from './sample-data-registry';
 
 export function Showcase() {
   const [selectedComponent, setSelectedComponent] = useState<string | null>(
@@ -77,12 +78,16 @@ export function Showcase() {
         {/* Main area */}
         <main className="flex-1 p-6">
           {selected && (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-6">
               {/* Preview */}
               <ComponentCard component={selected} componentType={activeTab} />
 
               {/* Documentation */}
-              <DocPanel component={selected} componentType={activeTab} />
+              <DocPanel
+                component={selected}
+                componentType={activeTab}
+                sampleData={sampleDataRegistry[selected.component]?.sampleData}
+              />
             </div>
           )}
         </main>
