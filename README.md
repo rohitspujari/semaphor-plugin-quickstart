@@ -13,7 +13,7 @@
 5. [Building Custom Visuals](#building-custom-visuals)
 6. [Building Custom Filters](#building-custom-filters)
 7. [Props Reference](#props-reference)
-8. [Working with Inline Filters](#working-with-inline-filters)
+8. [Rendering Inline Filters](#rendering-inline-filters-in-your-custom-components)
 9. [Settings & Configuration](#settings--configuration)
 10. [Theming](#theming)
 11. [Documentation & Metadata](#documentation--metadata)
