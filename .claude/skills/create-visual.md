@@ -1,21 +1,20 @@
-# Create Custom Visual or Filter
+# Create Custom Visual
 
-This skill guides you through creating a new custom visual or filter component for the Semaphor plugin.
+This skill creates a new custom visual component for the Semaphor plugin.
 
 ## Instructions
 
-When the user wants to create a new custom visual or filter, follow these steps:
+When the user wants to create a new custom visual, follow these steps:
 
 ### Step 1: Gather Requirements
 
 Ask the user:
-1. **Component type**: Visual or Filter?
-2. **Component name**: What should it be called? (e.g., "Revenue Chart", "Date Slider")
-3. **Brief description**: What does it do?
+1. **Component name**: What should it be called? (e.g., "Revenue Chart", "Sales Table")
+2. **Brief description**: What does it visualize?
 
 Convert the name to:
-- **PascalCase** for the component name (e.g., `RevenueChart`)
-- **kebab-case** for the folder/file name (e.g., `revenue-chart`)
+- **PascalCase** for component name (e.g., `RevenueChart`)
+- **kebab-case** for folder/file name (e.g., `revenue-chart`)
 
 ### Step 2: Create Component Files
 
@@ -26,7 +25,7 @@ src/components/semaphor-components/{kebab-case-name}/
 └── {kebab-case-name}.data.ts  # Sample data for Showcase
 ```
 
-#### For Visuals - Component Template (`{name}.tsx`):
+#### Component Template (`{name}.tsx`):
 
 ```tsx
 import { SingleInputVisualProps } from '../../config-types';
@@ -81,79 +80,8 @@ export function {PascalCaseName}({
 }
 ```
 
-#### For Filters - Component Template (`{name}.tsx`):
-
-```tsx
-import { CustomFilterProps, TSelectedRecord } from '../../config-types';
-
-/**
- * {Component Name}
- *
- * {Description from user}
- */
-export function {PascalCaseName}({
-  options,
-  selectedValues,
-  onChange,
-  onClear,
-  isLoading,
-  settings,
-  theme,
-  isSingleSelect,
-}: CustomFilterProps) {
-  const handleSelect = (option: TSelectedRecord) => {
-    const isSelected = selectedValues.some((v) => v.value === option.value);
-
-    if (isSingleSelect) {
-      onChange(isSelected ? [] : [option]);
-    } else {
-      if (isSelected) {
-        onChange(selectedValues.filter((v) => v.value !== option.value));
-      } else {
-        onChange([...selectedValues, option]);
-      }
-    }
-  };
-
-  if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading...</div>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((option) => {
-        const isSelected = selectedValues.some((v) => v.value === option.value);
-        return (
-          <button
-            key={String(option.value)}
-            onClick={() => handleSelect(option)}
-            className={`px-3 py-1 rounded text-sm transition-colors ${
-              isSelected
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted hover:bg-muted/80'
-            }`}
-          >
-            {option.label || String(option.value)}
-          </button>
-        );
-      })}
-
-      {selectedValues.length > 0 && (
-        <button
-          onClick={onClear}
-          className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          Clear
-        </button>
-      )}
-    </div>
-  );
-}
-```
-
 #### Sample Data Template (`{name}.data.ts`):
 
-For visuals:
 ```typescript
 import { Data } from '../../config-types';
 
@@ -161,6 +89,7 @@ export const sampleData: Data = [
   // Add sample data matching expected format
   { label: 'Item 1', value: 100 },
   { label: 'Item 2', value: 200 },
+  { label: 'Item 3', value: 150 },
 ];
 
 export const sampleSettings = {
@@ -173,33 +102,10 @@ export const sampleTheme = {
 };
 ```
 
-For filters:
-```typescript
-import { TSelectedRecord } from '../../config-types';
-
-export const sampleOptions: TSelectedRecord[] = [
-  { value: 'option1', label: 'Option 1' },
-  { value: 'option2', label: 'Option 2' },
-  { value: 'option3', label: 'Option 3' },
-];
-
-export const sampleSelectedValues: TSelectedRecord[] = [
-  { value: 'option1', label: 'Option 1' },
-];
-
-export const sampleSettings = {};
-
-export const sampleTheme = {
-  colors: ['#3b82f6'],
-  mode: 'light' as const,
-};
-```
-
 ### Step 3: Register in Configuration
 
-Edit `src/components/components.config.ts`:
+Edit `src/components/components.config.ts` - add to the `visuals` array:
 
-For visuals, add to the `visuals` array:
 ```typescript
 {
   name: '{Display Name}',
@@ -224,23 +130,14 @@ For visuals, add to the `visuals` array:
 |--------|------|----------|-------------|
 | label | text | Yes | Label for each item |
 | value | number | Yes | Numeric value |
-    `.trim(),
-    useCases: ['{Use case 1}', '{Use case 2}'],
-  },
-},
-```
 
-For filters, add to the `filters` array:
-```typescript
-{
-  name: '{Display Name}',
-  component: '{PascalCaseName}',
-  filterType: '{kebab-case-name}',
-  icon: '{LucideIconName}',
-  supportedDataTypes: [],  // Empty = all types supported
-  settings: {},
-  docs: {
-    description: '{Description}',
+### Example Query
+\`\`\`sql
+SELECT label, SUM(value) as value
+FROM table
+GROUP BY label
+\`\`\`
+    `.trim(),
     useCases: ['{Use case 1}', '{Use case 2}'],
   },
 },
@@ -251,7 +148,7 @@ For filters, add to the `filters` array:
 Edit `src/components/index.ts`:
 
 ```typescript
-// Add to visuals or filters section
+// Visuals
 export { {PascalCaseName} } from './semaphor-components/{kebab-case-name}/{kebab-case-name}';
 ```
 
@@ -270,7 +167,7 @@ import * as {camelCaseName}Data from '../components/semaphor-components/{kebab-c
 
 Tell the user:
 1. Run `npm run dev` to start the Showcase
-2. Check that the component appears in the gallery
+2. Check that the component appears in the Visuals tab
 3. Verify it renders correctly with sample data
 4. Check documentation displays properly
 
@@ -293,6 +190,3 @@ Common Lucide icons for visuals:
 - `BarChart`, `BarChart3`, `LineChart`, `PieChart`, `AreaChart`
 - `Table`, `Table2`, `LayoutGrid`, `LayoutDashboard`
 - `TrendingUp`, `Activity`, `Gauge`
-
-Common icons for filters:
-- `Filter`, `Layers`, `Tags`, `Calendar`, `Sliders`

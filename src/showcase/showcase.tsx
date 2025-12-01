@@ -18,9 +18,9 @@ export function Showcase() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b px-6 py-4">
-        <h1 className="text-2xl font-bold">Plugin Showcase</h1>
+        <h1 className="text-2xl font-bold">Showcase</h1>
         <p className="text-muted-foreground">
-          Preview and test your custom components with sample data
+          Preview your custom components with sample data
         </p>
       </header>
 
