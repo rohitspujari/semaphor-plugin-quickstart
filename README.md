@@ -8,20 +8,21 @@
 
 1. [Introduction](#introduction)
 2. [Quick Start](#quick-start)
-3. [Project Structure](#project-structure)
-4. [Local Development](#local-development)
-5. [Building Custom Visuals](#building-custom-visuals)
-6. [Building Custom Filters](#building-custom-filters)
-7. [Props Reference](#props-reference)
-8. [Rendering Inline Filters](#rendering-inline-filters-in-your-custom-components)
-9. [Settings & Configuration](#settings--configuration)
-10. [Theming](#theming)
-11. [Documentation & Metadata](#documentation--metadata)
-12. [Publishing to Semaphor](#publishing-to-semaphor)
-13. [Troubleshooting](#troubleshooting)
-14. [Best Practices](#best-practices)
-15. [API Reference](#api-reference)
-16. [Support](#support)
+3. [AI-Assisted Development with Claude](#ai-assisted-development-with-claude)
+4. [Project Structure](#project-structure)
+5. [Local Development](#local-development)
+6. [Building Custom Visuals](#building-custom-visuals)
+7. [Building Custom Filters](#building-custom-filters)
+8. [Props Reference](#props-reference)
+9. [Rendering Inline Filters](#rendering-inline-filters-in-your-custom-components)
+10. [Settings & Configuration](#settings--configuration)
+11. [Theming](#theming)
+12. [Documentation & Metadata](#documentation--metadata)
+13. [Publishing to Semaphor](#publishing-to-semaphor)
+14. [Troubleshooting](#troubleshooting)
+15. [Best Practices](#best-practices)
+16. [API Reference](#api-reference)
+17. [Support](#support)
 
 ---
 
@@ -176,6 +177,75 @@ semaphor publish
 ```
 
 Your plugin is now available in Semaphor's chart type selector.
+
+---
+
+## AI-Assisted Development with Claude
+
+Speed up your plugin development using **Claude Code**. This project includes specialized skills that let Claude generate complete, working components in a single shot.
+
+### Quick Generation with Claude
+
+```bash
+# Open Claude Code in this project
+claude
+
+# Generate a custom visual
+> /create-visual
+
+# Generate a custom filter
+> /create-filter
+```
+
+Claude will ask for a component name and description, then automatically:
+
+1. Create the component file with proper TypeScript types
+2. Create sample data for the Showcase
+3. Register the component in `components.config.ts`
+4. Export from `index.ts`
+5. Add to `sample-data-registry.ts`
+
+### Example Workflow
+
+```
+You: /create-visual
+
+Claude: What should the component be called?
+You: Sales Heatmap
+
+Claude: What does it visualize?
+You: A heatmap showing sales performance by region and time period
+
+Claude: Creating SalesHeatmap component...
+✓ Created src/components/semaphor-components/sales-heatmap/sales-heatmap.tsx
+✓ Created src/components/semaphor-components/sales-heatmap/sales-heatmap.data.ts
+✓ Updated components.config.ts
+✓ Updated index.ts
+✓ Updated sample-data-registry.ts
+
+Run `npm run dev` to preview in the Showcase.
+```
+
+### Available Skills
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| Create Visual | `/create-visual` | Generate a custom visualization component |
+| Create Filter | `/create-filter` | Generate a custom filter component |
+
+### Tips for Better Results
+
+- **Be specific**: "A donut chart with center label showing percentage" works better than "a chart"
+- **Mention libraries**: "Use Recharts for the bar chart" if you have a preference
+- **Describe interactions**: "Clicking a bar should highlight it and show a tooltip"
+
+After Claude generates your component, you can ask follow-up questions to refine it:
+
+```
+You: Can you add a legend below the chart?
+You: Make the colors match our brand palette
+You: Add animation when data changes
+```
 
 ---
 
