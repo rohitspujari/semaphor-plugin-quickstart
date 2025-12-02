@@ -95,7 +95,7 @@ export default defineConfig(({ mode }) => ({
   },
 
   build: {
-    sourcemap: true,
+    sourcemap: false,
     cssCodeSplit: false, // Inline CSS into the JavaScript bundle
     cssMinify: true, // Minify CSS
     lib: {
