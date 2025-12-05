@@ -269,15 +269,18 @@ semaphor-plugin-quickstart/
 │   │       │
 │   │       ├── my-table/
 │   │       │   ├── my-table.tsx      # React component
-│   │       │   └── my-table.data.ts  # Sample data for Showcase
+│   │       │   ├── my-table.data.ts  # Sample data for Showcase
+│   │       │   └── my-table.md       # Component documentation
 │   │       │
 │   │       ├── summary-table/
 │   │       │   ├── summary-table.tsx
-│   │       │   └── summary-table.data.ts
+│   │       │   ├── summary-table.data.ts
+│   │       │   └── summary-table.md
 │   │       │
 │   │       └── chip-filter/
 │   │           ├── chip-filter.tsx
-│   │           └── chip-filter.data.ts
+│   │           ├── chip-filter.data.ts
+│   │           └── chip-filter.md
 │   │
 │   ├── showcase/                     # Local development gallery
 │   │   ├── showcase.tsx              # Gallery UI
@@ -301,6 +304,7 @@ semaphor-plugin-quickstart/
 | -------------------------------------- | --------------------------------------- | ----------------------------- |
 | `semaphor-components/*/[name].tsx`     | React component implementation          | Creating/editing components   |
 | `semaphor-components/*/[name].data.ts` | Sample data for Showcase                | Creating components           |
+| `semaphor-components/*/[name].md`      | Component documentation                 | Creating/documenting components |
 | `components.config.ts`                 | Plugin manifest (names, settings, docs) | Adding/configuring components |
 | `index.ts`                             | Component exports                       | Adding components             |
 | `sample-data-registry.ts`              | Links components to sample data         | Adding components             |
@@ -335,6 +339,23 @@ export const sampleOptions = [...];
 export const sampleSelectedValues = [...];
 ```
 
+### Component Documentation Convention
+
+Each component should have a colocated `.md` file documenting how it works. This helps developers and AI agents understand the component quickly.
+
+**Required sections:**
+
+| Section | Purpose |
+|---------|---------|
+| **Overview** | What the component does |
+| **Architecture** | How it works internally (logic, data flow) |
+| **Data Shape** | Expected data format with column types |
+| **Sample Query** | Example SQL that produces the expected data |
+| **Settings** | Available settings and their effects |
+| **Usage Notes** | Edge cases, limitations, tips |
+
+See the existing component `.md` files for examples.
+
 ---
 
 ## Building Custom Visuals
@@ -345,9 +366,10 @@ export const sampleSelectedValues = [...];
 # Create the component folder
 mkdir src/components/semaphor-components/revenue-chart
 
-# Create the component and data files
+# Create the component, data, and documentation files
 touch src/components/semaphor-components/revenue-chart/revenue-chart.tsx
 touch src/components/semaphor-components/revenue-chart/revenue-chart.data.ts
+touch src/components/semaphor-components/revenue-chart/revenue-chart.md
 ```
 
 ### Step 2: Implement the Component
@@ -889,29 +911,43 @@ type SingleInputVisualProps = {
   inlineFilters?: ReactNode[];
 
   /**
-   * Auth token parameters.
-   * Contains user context from the JWT token.
+   * Dashboard filter definitions that apply to this card.
+   * Contains metadata about each filter (title, column, operation).
    */
-  params?: Record<string, any>;
+  filters?: DashboardFilter[];
 
   /**
-   * Filter metadata.
-   * Useful for inspecting configured filters.
+   * Active filter values - the current selections for each filter.
+   * Use this to display what filters are currently applied.
    */
-  filters?: Filter[];
-
-  /**
-   * Current filter values.
-   * Useful for reading filter state.
-   */
-  filterValues?: FilterValue[];
-
-  /**
-   * True when component is rendered in the visual editor.
-   * Can be used to show edit-specific UI.
-   */
-  editing?: boolean;
+  filterValues?: ActiveFilterValue[];
 };
+
+// Dashboard filter definition
+type DashboardFilter = {
+  id: string;
+  title: string;        // Display name
+  column: string;       // Column being filtered
+  table: string;        // Table containing the column
+  dataType: string;     // 'text', 'number', 'date', etc.
+  operation: FilterOperation;  // '=', 'in', 'between', etc.
+};
+
+// Active filter value
+type ActiveFilterValue = {
+  filterId: string;     // References DashboardFilter.id
+  name: string;         // Display name
+  operation: FilterOperation;
+  valueType: 'string' | 'number' | 'date' | 'boolean';
+  values: (string | number | boolean)[];
+  relativeDateMeta?: RelativeDateFilter;  // For "Last 7 days" etc.
+};
+
+// Filter operations
+type FilterOperation =
+  | '=' | '!=' | '>' | '<' | '>=' | '<='
+  | 'in' | 'not in' | 'like' | 'not like'
+  | 'between' | 'not between';
 ```
 
 ### CustomFilterProps

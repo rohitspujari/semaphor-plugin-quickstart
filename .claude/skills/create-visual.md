@@ -22,7 +22,8 @@ Create folder and files at:
 ```
 src/components/semaphor-components/{kebab-case-name}/
 ├── {kebab-case-name}.tsx      # React component
-└── {kebab-case-name}.data.ts  # Sample data for Showcase
+├── {kebab-case-name}.data.ts  # Sample data for Showcase
+└── {kebab-case-name}.md       # Component documentation
 ```
 
 #### Component Template (`{name}.tsx`):
@@ -40,6 +41,8 @@ export function {PascalCaseName}({
   settings,
   theme,
   inlineFilters = [],
+  filters = [],
+  filterValues = [],
 }: SingleInputVisualProps) {
   // Handle empty data state
   if (!data || data.length === 0) {
@@ -55,6 +58,9 @@ export function {PascalCaseName}({
 
   // Use theme colors
   const primaryColor = theme?.colors?.[0] || '#3b82f6';
+
+  // Access active dashboard filters (optional)
+  // filterValues.map(f => `${f.name}: ${f.values.join(', ')}`).join(' | ')
 
   return (
     <div className="flex flex-col h-full p-4">
@@ -100,6 +106,45 @@ export const sampleTheme = {
   colors: ['#3b82f6', '#10b981', '#f59e0b'],
   mode: 'light' as const,
 };
+```
+
+#### Documentation Template (`{name}.md`):
+
+```markdown
+# {Component Name}
+
+## Overview
+{Brief description of what this component does}
+
+## Architecture
+- {How the component processes/transforms data}
+- {Key rendering logic}
+- {State management approach if any}
+
+## Data Shape
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| {column1} | {type} | Yes/No | {description} |
+| {column2} | {type} | Yes/No | {description} |
+
+## Sample Query
+\`\`\`sql
+SELECT column1, column2
+FROM table_name
+WHERE conditions
+\`\`\`
+
+## Settings
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| title | string | "{Default Title}" | {What it controls} |
+
+## Usage Notes
+- {Edge cases to be aware of}
+- {Performance considerations}
+- {Common customizations}
 ```
 
 ### Step 3: Register in Configuration

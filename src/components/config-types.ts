@@ -49,6 +49,34 @@ export type SingleInputVisualProps = {
    * ```
    */
   inlineFilters?: ReactNode[];
+
+  /**
+   * Dashboard filter definitions that apply to this card.
+   * Contains metadata about each filter (title, column, operation).
+   */
+  filters?: DashboardFilter[];
+
+  /**
+   * Active filter values - the current selections for each filter.
+   * Use this to display what filters are currently applied.
+   *
+   * @example
+   * ```tsx
+   * export function MyChart({ data, filterValues = [] }: SingleInputVisualProps) {
+   *   return (
+   *     <div>
+   *       {filterValues.length > 0 && (
+   *         <div className="text-sm text-muted-foreground mb-2">
+   *           Filtered by: {filterValues.map(f => f.name).join(', ')}
+   *         </div>
+   *       )}
+   *       <ChartVisualization data={data} />
+   *     </div>
+   *   );
+   * }
+   * ```
+   */
+  filterValues?: ActiveFilterValue[];
 };
 
 export type MultiInputVisualProps = {
@@ -60,6 +88,18 @@ export type MultiInputVisualProps = {
    * Always an array (empty if no inline filters configured).
    */
   inlineFilters?: ReactNode[];
+
+  /**
+   * Dashboard filter definitions that apply to this card.
+   * Contains metadata about each filter (title, column, operation).
+   */
+  filters?: DashboardFilter[];
+
+  /**
+   * Active filter values - the current selections for each filter.
+   * Use this to display what filters are currently applied.
+   */
+  filterValues?: ActiveFilterValue[];
 };
 
 // ============================================
@@ -93,6 +133,54 @@ export type RelativeDateFilter = {
   toDate?: boolean;
   from?: number;
   to?: number;
+};
+
+// ============================================
+// Dashboard Filter Types (Simplified)
+// ============================================
+
+/**
+ * Filter operation types
+ */
+export type FilterOperation =
+  | '='
+  | '!='
+  | '>'
+  | '<'
+  | '>='
+  | '<='
+  | 'in'
+  | 'not in'
+  | 'like'
+  | 'not like'
+  | 'between'
+  | 'not between';
+
+/**
+ * Simplified filter definition - metadata about a dashboard filter.
+ * Use this to understand what filters are configured on the dashboard.
+ */
+export type DashboardFilter = {
+  id: string;
+  title: string; // Display name of the filter
+  column: string; // Column being filtered
+  table: string; // Table containing the column
+  dataType: string; // 'text', 'number', 'date', etc.
+  operation: FilterOperation;
+};
+
+/**
+ * Simplified active filter value - the current selection for a filter.
+ * Use this to display or react to active filter selections.
+ */
+export type ActiveFilterValue = {
+  filterId: string; // References DashboardFilter.id
+  name: string; // Display name
+  operation: FilterOperation;
+  valueType: 'string' | 'number' | 'date' | 'boolean';
+  values: (string | number | boolean)[]; // Selected values
+  // For date filters with relative dates (e.g., "Last 7 days")
+  relativeDateMeta?: RelativeDateFilter;
 };
 
 /**

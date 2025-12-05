@@ -35,7 +35,8 @@ src/
 │   ├── semaphor-components/       # Custom components
 │   │   ├── my-table/
 │   │   │   ├── my-table.tsx       # Component implementation
-│   │   │   └── my-table.data.ts   # Sample data for Showcase
+│   │   │   ├── my-table.data.ts   # Sample data for Showcase
+│   │   │   └── my-table.md        # Component documentation
 │   │   ├── summary-table/
 │   │   └── chip-filter/
 │   │
@@ -53,24 +54,28 @@ src/
 
 ## Creating a New Visual
 
-Use the skill: `/create-custom-visual` or follow these steps:
+Use the skill: `/create-visual` or follow these steps:
 
 1. **Create folder**: `src/components/semaphor-components/{name}/`
 2. **Create component**: `{name}.tsx` using `SingleInputVisualProps`
 3. **Create sample data**: `{name}.data.ts` with `sampleData`, `sampleSettings`, `sampleTheme`
-4. **Register in config**: Add to `components.config.ts` visuals array with inline docs
-5. **Export**: Add to `index.ts`
-6. **Register sample data**: Add to `sample-data-registry.ts`
-7. **Test**: Run `npm run dev` and check Showcase
+4. **Create documentation**: `{name}.md` with overview, architecture, data shape, sample query, settings
+5. **Register in config**: Add to `components.config.ts` visuals array with inline docs
+6. **Export**: Add to `index.ts`
+7. **Register sample data**: Add to `sample-data-registry.ts`
+8. **Test**: Run `npm run dev` and check Showcase
 
 ## Creating a New Filter
+
+Use the skill: `/create-filter` or follow these steps:
 
 1. **Create folder**: `src/components/semaphor-components/{name}/`
 2. **Create component**: `{name}.tsx` using `CustomFilterProps`
 3. **Create sample data**: `{name}.data.ts` with `sampleOptions`, `sampleSelectedValues`
-4. **Register in config**: Add to `components.config.ts` filters array
-5. **Export**: Add to `index.ts`
-6. **Register sample data**: Add to `sample-data-registry.ts`
+4. **Create documentation**: `{name}.md` with overview, architecture, usage notes
+5. **Register in config**: Add to `components.config.ts` filters array
+6. **Export**: Add to `index.ts`
+7. **Register sample data**: Add to `sample-data-registry.ts`
 
 ## Key Patterns
 
@@ -82,7 +87,9 @@ type SingleInputVisualProps = {
   data: Record<string, string | number | boolean>[];
   settings?: Record<string, string | number | boolean>;
   theme?: { colors: string[]; mode: 'light' | 'dark' | 'system' };
-  inlineFilters?: ReactNode[];  // Always default to []
+  inlineFilters?: ReactNode[];  // Pre-rendered inline filter components
+  filters?: DashboardFilter[];  // Filter definitions (metadata)
+  filterValues?: ActiveFilterValue[];  // Active filter selections
 };
 ```
 
@@ -107,6 +114,46 @@ Render inline filters wherever appropriate:
 {inlineFilters.length > 0 && (
   <div className="flex gap-2 mb-4">{inlineFilters}</div>
 )}
+```
+
+### Accessing Dashboard Filters
+
+Visuals receive `filters` (definitions) and `filterValues` (active selections):
+
+```typescript
+type DashboardFilter = {
+  id: string;
+  title: string;      // Display name
+  column: string;     // Column being filtered
+  table: string;
+  dataType: string;   // 'text', 'number', 'date', etc.
+  operation: FilterOperation;  // '=', 'in', 'between', etc.
+};
+
+type ActiveFilterValue = {
+  filterId: string;
+  name: string;
+  operation: FilterOperation;
+  valueType: 'string' | 'number' | 'date' | 'boolean';
+  values: (string | number | boolean)[];
+  relativeDateMeta?: RelativeDateFilter;  // For "Last 7 days" etc.
+};
+```
+
+Example - display active filters:
+```tsx
+export function MyChart({ data, filterValues = [] }: SingleInputVisualProps) {
+  return (
+    <div>
+      {filterValues.length > 0 && (
+        <div className="text-xs text-muted-foreground mb-2">
+          Filters: {filterValues.map(f => `${f.name}: ${f.values.join(', ')}`).join(' | ')}
+        </div>
+      )}
+      <Chart data={data} />
+    </div>
+  );
+}
 ```
 
 ### Settings
@@ -134,6 +181,31 @@ Define docs inline in `components.config.ts`:
   },
 }
 ```
+
+### Component Documentation Files
+
+Each component should have a colocated `.md` file for detailed documentation. This helps both developers and AI agents understand the component quickly.
+
+**Structure:**
+```
+my-table/
+├── my-table.tsx        # Component implementation
+├── my-table.data.ts    # Sample data for Showcase
+└── my-table.md         # Component documentation
+```
+
+**Required sections in `{name}.md`:**
+
+| Section | Purpose |
+|---------|---------|
+| **Overview** | What the component does |
+| **Architecture** | How it works internally (logic, data flow) |
+| **Data Shape** | Expected data format with column types |
+| **Sample Query** | Example SQL that produces the expected data |
+| **Settings** | Available settings and their effects |
+| **Usage Notes** | Edge cases, limitations, tips |
+
+See existing components for examples: `my-table.md`, `chip-filter.md`.
 
 ## Naming Convention
 

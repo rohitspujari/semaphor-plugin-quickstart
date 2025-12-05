@@ -22,7 +22,8 @@ Create folder and files at:
 ```
 src/components/semaphor-components/{kebab-case-name}/
 ├── {kebab-case-name}.tsx      # React component
-└── {kebab-case-name}.data.ts  # Sample data for Showcase
+├── {kebab-case-name}.data.ts  # Sample data for Showcase
+└── {kebab-case-name}.md       # Component documentation
 ```
 
 #### Component Template (`{name}.tsx`):
@@ -117,6 +118,34 @@ export const sampleTheme = {
   colors: ['#3b82f6'],
   mode: 'light' as const,
 };
+```
+
+#### Documentation Template (`{name}.md`):
+
+```markdown
+# {Component Name}
+
+## Overview
+{Brief description of what this filter does and the interaction it provides}
+
+## Architecture
+- {How selection/deselection works}
+- {How it handles single vs multi-select}
+- {Any keyboard/accessibility considerations}
+
+## Supported Data Types
+{List data types this filter works best with, or "all types" if universal}
+
+## Settings
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| {setting1} | {type} | {default} | {What it controls} |
+
+## Usage Notes
+- {When to use this filter vs alternatives}
+- {Styling customization tips}
+- {Edge cases with large option sets}
 ```
 
 ### Step 3: Register in Configuration
