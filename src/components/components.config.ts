@@ -3,6 +3,59 @@ import { ComponentsConfig } from './config-types';
 export const config: ComponentsConfig = {
   visuals: [
     {
+      name: 'Sankey Chart',
+      component: 'SankeyChart',
+      componentType: 'chart',
+      chartType: 'sankey-chart',
+      icon: 'GitBranch',
+      settings: {
+        title: {
+          title: 'Title',
+          defaultValue: '',
+          ui: 'input',
+          docs: { description: 'Optional title displayed above the chart' },
+        },
+        nodeWidth: {
+          title: 'Node Width',
+          defaultValue: '20',
+          ui: 'input',
+          docs: { description: 'Width of node rectangles in pixels' },
+        },
+        nodePadding: {
+          title: 'Node Padding',
+          defaultValue: '24',
+          ui: 'input',
+          docs: { description: 'Vertical spacing between nodes' },
+        },
+      },
+      docs: {
+        description:
+          'A flowing visualization showing how values move between categories. Perfect for user journeys, budget flows, and process analysis.',
+        dataSchema: `
+### Expected Data Format
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| source | text | Yes | Origin node name |
+| target | text | Yes | Destination node name |
+| value | number | Yes | Flow quantity |
+
+### Example Query
+\`\`\`sql
+SELECT page_from AS source, page_to AS target, COUNT(*) AS value
+FROM user_sessions
+GROUP BY page_from, page_to
+\`\`\`
+        `.trim(),
+        useCases: [
+          'User journey and conversion funnels',
+          'Budget allocation flows',
+          'Energy or resource distribution',
+          'Supply chain visualization',
+        ],
+      },
+    },
+    {
       name: 'My New Table',
       component: 'MyTable',
       componentType: 'chart',
