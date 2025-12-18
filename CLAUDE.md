@@ -8,7 +8,7 @@ This is the **Semaphor Plugin SDK** - a quickstart template for building custom 
 
 ## Tech Stack
 
-- **React 18** - UI framework
+- **React 19** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Styling
@@ -84,41 +84,45 @@ Use the skill: `/create-filter` or follow these steps:
 When creating visuals, choose one of two approaches for reading data columns:
 
 **Positional Columns (Recommended)**
+
 - Columns read by position: 1st, 2nd, 3rd...
 - Works with any SQL query - just order SELECT columns correctly
 - More flexible, no column name matching required
 
 ```typescript
 const keys = Object.keys(data[0]);
-const labelKey = keys[0];  // 1st column
-const valueKey = keys[1];  // 2nd column
-data.map(row => row[labelKey])
+const labelKey = keys[0]; // 1st column
+const valueKey = keys[1]; // 2nd column
+data.map((row) => row[labelKey]);
 ```
 
 **Named Columns**
+
 - Columns read by exact name: `row.label`, `row.value`
 - SQL must use matching column names or aliases
 - More explicit, but less flexible
 
 ```typescript
-data.map(row => row.label)  // Must have column named "label"
+data.map((row) => row.label); // Must have column named "label"
 ```
 
 ### Component Props
 
 **Visuals** receive:
+
 ```typescript
 type SingleInputVisualProps = {
   data: Record<string, string | number | boolean>[];
   settings?: Record<string, string | number | boolean>;
   theme?: { colors: string[]; mode: 'light' | 'dark' | 'system' };
-  inlineFilters?: ReactNode[];  // Pre-rendered inline filter components
-  filters?: DashboardFilter[];  // Filter definitions (metadata)
-  filterValues?: ActiveFilterValue[];  // Active filter selections
+  inlineFilters?: ReactNode[]; // Pre-rendered inline filter components
+  filters?: DashboardFilter[]; // Filter definitions (metadata)
+  filterValues?: ActiveFilterValue[]; // Active filter selections
 };
 ```
 
 **Filters** receive:
+
 ```typescript
 type CustomFilterProps = {
   options: TSelectedRecord[];
@@ -135,10 +139,13 @@ type CustomFilterProps = {
 ### Inline Filters
 
 Render inline filters wherever appropriate:
+
 ```tsx
-{inlineFilters.length > 0 && (
-  <div className="flex gap-2 mb-4">{inlineFilters}</div>
-)}
+{
+  inlineFilters.length > 0 && (
+    <div className="flex gap-2 mb-4">{inlineFilters}</div>
+  );
+}
 ```
 
 ### Print State Protocol (PDF Export Support)
@@ -146,10 +153,11 @@ Render inline filters wherever appropriate:
 When creating components with expandable sections (accordions, collapsible panels, expandable rows), follow this protocol so the expanded state is captured correctly in PDF exports.
 
 **Required attributes on toggle elements:**
+
 ```tsx
 <button
-  data-spr-expand-id={uniqueStableId}  // Unique ID based on data (not random)
-  aria-expanded={isExpanded}            // Standard accessibility attribute
+  data-spr-expand-id={uniqueStableId} // Unique ID based on data (not random)
+  aria-expanded={isExpanded} // Standard accessibility attribute
   onClick={toggleExpand}
 >
   Toggle Section
@@ -157,6 +165,7 @@ When creating components with expandable sections (accordions, collapsible panel
 ```
 
 **ID naming conventions:**
+
 ```tsx
 // Good: Stable IDs based on data
 data-spr-expand-id={`category-${row.categoryId}`}
@@ -167,6 +176,7 @@ data-spr-expand-id={Math.random()}
 ```
 
 **For async expansion (loading data on expand):**
+
 ```tsx
 <button
   data-spr-expand-id={id}
@@ -177,6 +187,7 @@ data-spr-expand-id={Math.random()}
 ```
 
 **IMPORTANT:** When generating components with expandable sections:
+
 1. Always add `data-spr-expand-id` with a stable, data-derived ID
 2. Always add `aria-expanded` (also good for accessibility)
 3. Ensure the element responds to `.click()` events
@@ -189,11 +200,11 @@ Visuals receive `filters` (definitions) and `filterValues` (active selections):
 ```typescript
 type DashboardFilter = {
   id: string;
-  title: string;      // Display name
-  column: string;     // Column being filtered
+  title: string; // Display name
+  column: string; // Column being filtered
   table: string;
-  dataType: string;   // 'text', 'number', 'date', etc.
-  operation: FilterOperation;  // '=', 'in', 'between', etc.
+  dataType: string; // 'text', 'number', 'date', etc.
+  operation: FilterOperation; // '=', 'in', 'between', etc.
 };
 
 type ActiveFilterValue = {
@@ -202,18 +213,22 @@ type ActiveFilterValue = {
   operation: FilterOperation;
   valueType: 'string' | 'number' | 'date' | 'boolean';
   values: (string | number | boolean)[];
-  relativeDateMeta?: RelativeDateFilter;  // For "Last 7 days" etc.
+  relativeDateMeta?: RelativeDateFilter; // For "Last 7 days" etc.
 };
 ```
 
 Example - display active filters:
+
 ```tsx
 export function MyChart({ data, filterValues = [] }: SingleInputVisualProps) {
   return (
     <div>
       {filterValues.length > 0 && (
         <div className="text-xs text-muted-foreground mb-2">
-          Filters: {filterValues.map(f => `${f.name}: ${f.values.join(', ')}`).join(' | ')}
+          Filters:{' '}
+          {filterValues
+            .map((f) => `${f.name}: ${f.values.join(', ')}`)
+            .join(' | ')}
         </div>
       )}
       <Chart data={data} />
@@ -225,6 +240,7 @@ export function MyChart({ data, filterValues = [] }: SingleInputVisualProps) {
 ### Settings
 
 Settings values are always strings. Parse as needed:
+
 ```typescript
 const title = (settings?.title as string) || 'Default';
 const count = Number(settings?.count) || 10;
@@ -234,6 +250,7 @@ const enabled = settings?.enabled !== 'false';
 ### Documentation in Config
 
 Define docs inline in `components.config.ts`:
+
 ```typescript
 {
   name: 'My Visual',
@@ -253,6 +270,7 @@ Define docs inline in `components.config.ts`:
 Each component should have a colocated `.md` file for detailed documentation. This helps both developers and AI agents understand the component quickly.
 
 **Structure:**
+
 ```
 my-table/
 ├── my-table.tsx        # Component implementation
@@ -262,14 +280,14 @@ my-table/
 
 **Required sections in `{name}.md`:**
 
-| Section | Purpose |
-|---------|---------|
-| **Overview** | What the component does |
-| **Architecture** | How it works internally (logic, data flow) |
-| **Data Shape** | Expected data format with column types |
+| Section          | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| **Overview**     | What the component does                     |
+| **Architecture** | How it works internally (logic, data flow)  |
+| **Data Shape**   | Expected data format with column types      |
 | **Sample Query** | Example SQL that produces the expected data |
-| **Settings** | Available settings and their effects |
-| **Usage Notes** | Edge cases, limitations, tips |
+| **Settings**     | Available settings and their effects        |
+| **Usage Notes**  | Edge cases, limitations, tips               |
 
 See existing components for examples: `my-table.md`, `chip-filter.md`.
 
@@ -284,6 +302,7 @@ See existing components for examples: `my-table.md`, `chip-filter.md`.
 **"Element type is invalid. Received a promise that resolves to: undefined"**
 
 This means component names don't match. Verify:
+
 1. `export function {Name}` in `.tsx` file
 2. `export { {Name} }` in `index.ts`
 3. `component: '{Name}'` in `components.config.ts`
@@ -304,6 +323,7 @@ semaphor publish
 ## Reference
 
 See `README.md` for complete documentation including:
+
 - Detailed props reference
 - Theming guide
 - Multi-input visuals
