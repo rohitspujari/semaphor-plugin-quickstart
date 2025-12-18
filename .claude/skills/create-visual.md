@@ -11,6 +11,9 @@ When the user wants to create a new custom visual, follow these steps:
 Ask the user:
 1. **Component name**: What should it be called? (e.g., "Revenue Chart", "Sales Table")
 2. **Brief description**: What does it visualize?
+3. **Column approach**:
+   - **Positional (Recommended)** - Columns read by position (1st, 2nd, 3rd...). Works with any SQL query.
+   - **Named** - Columns read by exact name. SQL must use matching column names/aliases.
 
 Convert the name to:
 - **PascalCase** for component name (e.g., `RevenueChart`)
@@ -26,7 +29,13 @@ src/components/semaphor-components/{kebab-case-name}/
 └── {kebab-case-name}.md       # Component documentation
 ```
 
-#### Component Template (`{name}.tsx`):
+---
+
+## Positional Columns (Recommended)
+
+Use this approach when you want the visual to work with any SQL query - users just need to order their SELECT columns correctly.
+
+### Component Template (Positional)
 
 ```tsx
 import { SingleInputVisualProps } from '../../config-types';
@@ -35,16 +44,18 @@ import { SingleInputVisualProps } from '../../config-types';
  * {Component Name}
  *
  * {Description from user}
+ *
+ * Column mapping (positional):
+ * - 1st column: {purpose}
+ * - 2nd column: {purpose}
+ * - etc.
  */
 export function {PascalCaseName}({
   data,
   settings,
   theme,
   inlineFilters = [],
-  filters = [],
-  filterValues = [],
 }: SingleInputVisualProps) {
-  // Handle empty data state
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground">
@@ -53,14 +64,17 @@ export function {PascalCaseName}({
     );
   }
 
-  // Read settings with defaults
+  // Position-based column detection
+  const keys = Object.keys(data[0]);
+  const labelKey = keys[0];  // 1st column
+  const valueKey = keys[1];  // 2nd column
+  // Add more as needed: const detailsKey = keys[2];
+
+  // Settings
   const title = (settings?.title as string) || '{Default Title}';
 
-  // Use theme colors
+  // Theme colors
   const primaryColor = theme?.colors?.[0] || '#3b82f6';
-
-  // Access active dashboard filters (optional)
-  // filterValues.map(f => `${f.name}: ${f.values.join(', ')}`).join(' | ')
 
   return (
     <div className="flex flex-col h-full p-4">
@@ -74,28 +88,29 @@ export function {PascalCaseName}({
       {/* Header */}
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
 
-      {/* Content - implement visualization here */}
+      {/* Content */}
       <div className="flex-1">
-        {/* TODO: Add visualization */}
-        <pre className="text-xs overflow-auto">
-          {JSON.stringify(data.slice(0, 3), null, 2)}
-        </pre>
+        {data.map((row, index) => (
+          <div key={index} className="flex justify-between py-2 border-b">
+            <span>{row[labelKey]}</span>
+            <span>{row[valueKey]}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 ```
 
-#### Sample Data Template (`{name}.data.ts`):
+### Sample Data Template (Positional)
 
 ```typescript
-import { Data } from '../../config-types';
-
-export const sampleData: Data = [
-  // Add sample data matching expected format
-  { label: 'Item 1', value: 100 },
-  { label: 'Item 2', value: 200 },
-  { label: 'Item 3', value: 150 },
+// Position-based columns - ORDER MATTERS
+// 1st column = label, 2nd column = value
+export const sampleData = [
+  { label: 'Item A', value: 100 },
+  { label: 'Item B', value: 200 },
+  { label: 'Item C', value: 150 },
 ];
 
 export const sampleSettings = {
@@ -108,48 +123,40 @@ export const sampleTheme = {
 };
 ```
 
-#### Documentation Template (`{name}.md`):
+### Documentation Template (Positional)
 
 ```markdown
 # {Component Name}
 
 ## Overview
-{Brief description of what this component does}
+{Brief description}
 
-## Architecture
-- {How the component processes/transforms data}
-- {Key rendering logic}
-- {State management approach if any}
+## Position-Based Column Mapping
 
-## Data Shape
-
-| Column | Type | Required | Description |
-|--------|------|----------|-------------|
-| {column1} | {type} | Yes/No | {description} |
-| {column2} | {type} | Yes/No | {description} |
+| Position | Purpose | Required |
+|----------|---------|----------|
+| 1st column | Label/category | Yes |
+| 2nd column | Value | Yes |
 
 ## Sample Query
 \`\`\`sql
-SELECT column1, column2
-FROM table_name
-WHERE conditions
+SELECT category_name, SUM(amount) as total
+FROM sales
+GROUP BY category_name
 \`\`\`
 
 ## Settings
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| title | string | "{Default Title}" | {What it controls} |
+| title | string | "{Default Title}" | Header title |
 
 ## Usage Notes
-- {Edge cases to be aware of}
-- {Performance considerations}
-- {Common customizations}
+- Column order matters - the component reads by position, not name
+- Any column names work as long as order is correct
 ```
 
-### Step 3: Register in Configuration
-
-Edit `src/components/components.config.ts` - add to the `visuals` array:
+### Config Entry (Positional)
 
 ```typescript
 {
@@ -157,30 +164,28 @@ Edit `src/components/components.config.ts` - add to the `visuals` array:
   component: '{PascalCaseName}',
   componentType: 'chart',
   chartType: '{kebab-case-name}',
-  icon: '{LucideIconName}',  // e.g., 'BarChart', 'Table', 'PieChart'
+  icon: '{LucideIconName}',
   settings: {
     title: {
       title: 'Title',
       defaultValue: '{Default Title}',
       ui: 'input',
-      docs: { description: 'The heading displayed at the top' },
+      docs: { description: 'Header title' },
     },
   },
   docs: {
     description: '{Description}',
     dataSchema: `
-### Expected Data Format
+### Position-Based Columns
 
-| Column | Type | Required | Description |
-|--------|------|----------|-------------|
-| label | text | Yes | Label for each item |
-| value | number | Yes | Numeric value |
+| Position | Purpose |
+|----------|---------|
+| 1st | Label |
+| 2nd | Value |
 
 ### Example Query
 \`\`\`sql
-SELECT label, SUM(value) as value
-FROM table
-GROUP BY label
+SELECT name, amount FROM table
 \`\`\`
     `.trim(),
     useCases: ['{Use case 1}', '{Use case 2}'],
@@ -188,50 +193,196 @@ GROUP BY label
 },
 ```
 
-### Step 4: Export the Component
+---
 
-Edit `src/components/index.ts`:
+## Named Columns
+
+Use this approach when you want explicit column names that users must match in their SQL.
+
+### Component Template (Named)
+
+```tsx
+import { SingleInputVisualProps } from '../../config-types';
+
+/**
+ * {Component Name}
+ *
+ * {Description from user}
+ *
+ * Required columns: label, value
+ */
+export function {PascalCaseName}({
+  data,
+  settings,
+  theme,
+  inlineFilters = [],
+}: SingleInputVisualProps) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground">
+        <p>No data available</p>
+      </div>
+    );
+  }
+
+  // Settings
+  const title = (settings?.title as string) || '{Default Title}';
+
+  // Theme colors
+  const primaryColor = theme?.colors?.[0] || '#3b82f6';
+
+  return (
+    <div className="flex flex-col h-full p-4">
+      {/* Inline filters */}
+      {inlineFilters.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 rounded-lg border">
+          {inlineFilters}
+        </div>
+      )}
+
+      {/* Header */}
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+
+      {/* Content */}
+      <div className="flex-1">
+        {data.map((row, index) => (
+          <div key={index} className="flex justify-between py-2 border-b">
+            <span>{row.label}</span>
+            <span>{row.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+### Sample Data Template (Named)
 
 ```typescript
-// Visuals
+// Named columns - must use exact column names: label, value
+export const sampleData = [
+  { label: 'Item A', value: 100 },
+  { label: 'Item B', value: 200 },
+  { label: 'Item C', value: 150 },
+];
+
+export const sampleSettings = {
+  title: '{Default Title}',
+};
+
+export const sampleTheme = {
+  colors: ['#3b82f6', '#10b981', '#f59e0b'],
+  mode: 'light' as const,
+};
+```
+
+### Documentation Template (Named)
+
+```markdown
+# {Component Name}
+
+## Overview
+{Brief description}
+
+## Required Columns
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| label | text | Yes | Display label |
+| value | number | Yes | Numeric value |
+
+## Sample Query
+\`\`\`sql
+SELECT category_name AS label, SUM(amount) AS value
+FROM sales
+GROUP BY category_name
+\`\`\`
+
+## Settings
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| title | string | "{Default Title}" | Header title |
+
+## Usage Notes
+- SQL must return columns named exactly: label, value
+- Use AS aliases if your source columns have different names
+```
+
+### Config Entry (Named)
+
+```typescript
+{
+  name: '{Display Name}',
+  component: '{PascalCaseName}',
+  componentType: 'chart',
+  chartType: '{kebab-case-name}',
+  icon: '{LucideIconName}',
+  settings: {
+    title: {
+      title: 'Title',
+      defaultValue: '{Default Title}',
+      ui: 'input',
+      docs: { description: 'Header title' },
+    },
+  },
+  docs: {
+    description: '{Description}',
+    dataSchema: `
+### Required Columns
+
+| Column | Type | Description |
+|--------|------|-------------|
+| label | text | Display label |
+| value | number | Numeric value |
+
+### Example Query
+\`\`\`sql
+SELECT name AS label, amount AS value FROM table
+\`\`\`
+    `.trim(),
+    useCases: ['{Use case 1}', '{Use case 2}'],
+  },
+},
+```
+
+---
+
+## Final Steps (Both Approaches)
+
+### Step 3: Export the Component
+
+Edit `src/components/index.ts`:
+```typescript
 export { {PascalCaseName} } from './semaphor-components/{kebab-case-name}/{kebab-case-name}';
 ```
 
-### Step 5: Register Sample Data
+### Step 4: Register Sample Data
 
 Edit `src/showcase/sample-data-registry.ts`:
-
 ```typescript
 import * as {camelCaseName}Data from '../components/semaphor-components/{kebab-case-name}/{kebab-case-name}.data';
 
-// Add to the registry object
+// Add to registry
 {PascalCaseName}: {camelCaseName}Data,
 ```
 
-### Step 6: Verify
+### Step 5: Verify
 
 Tell the user:
 1. Run `npm run dev` to start the Showcase
-2. Check that the component appears in the Visuals tab
-3. Verify it renders correctly with sample data
-4. Check documentation displays properly
+2. Check that the component appears and renders correctly
+3. Verify documentation displays properly
 
 ## Critical Naming Rules
 
-The component name must match EXACTLY across these files:
-- `export function {Name}` in the `.tsx` file
+The component name must match EXACTLY across:
+- `export function {Name}` in `.tsx`
 - `export { {Name} }` in `index.ts`
 - `component: '{Name}'` in `components.config.ts`
-- `{Name}: data` key in `sample-data-registry.ts`
-
-**Mismatch causes runtime error:**
-```
-Element type is invalid. Received a promise that resolves to: undefined.
-```
+- `{Name}: data` in `sample-data-registry.ts`
 
 ## Available Icons
 
-Common Lucide icons for visuals:
-- `BarChart`, `BarChart3`, `LineChart`, `PieChart`, `AreaChart`
-- `Table`, `Table2`, `LayoutGrid`, `LayoutDashboard`
-- `TrendingUp`, `Activity`, `Gauge`
+Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashboard`, `TrendingUp`, `Activity`

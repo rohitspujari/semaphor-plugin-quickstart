@@ -79,6 +79,31 @@ Use the skill: `/create-filter` or follow these steps:
 
 ## Key Patterns
 
+### Column Approaches
+
+When creating visuals, choose one of two approaches for reading data columns:
+
+**Positional Columns (Recommended)**
+- Columns read by position: 1st, 2nd, 3rd...
+- Works with any SQL query - just order SELECT columns correctly
+- More flexible, no column name matching required
+
+```typescript
+const keys = Object.keys(data[0]);
+const labelKey = keys[0];  // 1st column
+const valueKey = keys[1];  // 2nd column
+data.map(row => row[labelKey])
+```
+
+**Named Columns**
+- Columns read by exact name: `row.label`, `row.value`
+- SQL must use matching column names or aliases
+- More explicit, but less flexible
+
+```typescript
+data.map(row => row.label)  // Must have column named "label"
+```
+
 ### Component Props
 
 **Visuals** receive:

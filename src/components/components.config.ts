@@ -3,6 +3,62 @@ import { ComponentsConfig } from './config-types';
 export const config: ComponentsConfig = {
   visuals: [
     {
+      name: 'Expandable Table',
+      component: 'ExpandableTable',
+      componentType: 'chart',
+      chartType: 'expandable-table',
+      icon: 'TableProperties',
+      settings: {
+        title: {
+          title: 'Title',
+          defaultValue: 'Expandable Table',
+          ui: 'input',
+          docs: { description: 'Header title displayed above the table' },
+        },
+        showNested: {
+          title: 'Show Nested Details',
+          defaultValue: 'true',
+          ui: 'select',
+          options: [
+            { label: 'Yes', value: 'true' },
+            { label: 'No', value: 'false' },
+          ],
+          docs: {
+            description:
+              'Enable Level 2 expansion for items with details',
+          },
+        },
+      },
+      docs: {
+        description:
+          'A hierarchical table with two levels of expandable sections. Uses position-based columns. Demonstrates Print State Protocol for PDF export support.',
+        dataSchema: `
+### Position-Based Column Mapping
+
+| Position | Purpose | Required |
+|----------|---------|----------|
+| 1st column | Category - groups rows | Yes |
+| 2nd column | Name - item label | Yes |
+| 3rd column | Value - numeric totals | Yes |
+| 4th column | Details - expandable content | No |
+| 5th+ | Extra fields in expanded view | No |
+
+### Example Query
+\`\`\`sql
+SELECT category, product_name, price, description, status
+FROM products
+ORDER BY category, product_name
+\`\`\`
+        `.trim(),
+        useCases: [
+          'Product inventory with expandable details',
+          'Hierarchical data exploration',
+          'Testing Print State Protocol for PDF export',
+          'Grouped data with drill-down capability',
+        ],
+      },
+    },
+    {
       name: 'Sankey Chart',
       component: 'SankeyChart',
       componentType: 'chart',
