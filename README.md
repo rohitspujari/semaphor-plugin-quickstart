@@ -17,12 +17,13 @@
 9. [Rendering Inline Filters](#rendering-inline-filters-in-your-custom-components)
 10. [Settings & Configuration](#settings--configuration)
 11. [Theming](#theming)
-12. [Documentation & Metadata](#documentation--metadata)
-13. [Publishing to Semaphor](#publishing-to-semaphor)
-14. [Troubleshooting](#troubleshooting)
-15. [Best Practices](#best-practices)
-16. [API Reference](#api-reference)
-17. [Support](#support)
+12. [Supporting PDF Export](#supporting-pdf-export)
+13. [Documentation & Metadata](#documentation--metadata)
+14. [Publishing to Semaphor](#publishing-to-semaphor)
+15. [Troubleshooting](#troubleshooting)
+16. [Best Practices](#best-practices)
+17. [API Reference](#api-reference)
+18. [Support](#support)
 
 ---
 
@@ -1236,6 +1237,164 @@ If you're using Tailwind, leverage dark mode classes:
   {/* Content adapts automatically */}
 </div>
 ```
+
+---
+
+## Supporting PDF Export
+
+When users export dashboards or visuals as PDFs, Semaphor captures the current state of your custom components—including which sections are expanded or collapsed. This ensures the exported PDF matches what the user sees on screen.
+
+### The Print State Protocol
+
+If your component has expandable sections (accordions, collapsible panels, expandable rows, etc.), follow this protocol so they're captured correctly in PDF exports.
+
+**Requirements:**
+
+1. **Add `data-spr-expand-id`** — A unique, stable identifier for each expandable element
+2. **Add `aria-expanded`** — Standard accessibility attribute showing current state
+3. **Make elements clickable** — The toggle must respond to `.click()` events
+
+### Implementation Example
+
+```tsx
+import { useState } from 'react';
+
+function ExpandableSection({ id, title, children }: Props) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div>
+      {/* Toggle button with print state protocol attributes */}
+      <button
+        data-spr-expand-id={id}           // Unique stable ID
+        aria-expanded={isExpanded}         // Current expanded state
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-2 w-full p-2 hover:bg-muted"
+      >
+        <ChevronRight
+          className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+        />
+        <span>{title}</span>
+      </button>
+
+      {/* Collapsible content */}
+      {isExpanded && (
+        <div className="pl-6 py-2">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### ID Naming Conventions
+
+Use stable, predictable IDs based on your data:
+
+```tsx
+// Good: IDs based on data values
+data-spr-expand-id={`category-${row.categoryId}`}
+data-spr-expand-id={`section-${section.slug}`}
+data-spr-expand-id={`row-${rowIndex}-details`}
+
+// Bad: Unstable IDs
+data-spr-expand-id={Math.random()}
+data-spr-expand-id={`item-${Date.now()}`}
+```
+
+### Nested Expandables
+
+For nested expandable sections, use hierarchical IDs:
+
+```tsx
+// Parent section
+<button
+  data-spr-expand-id="region-north-america"
+  aria-expanded={regionExpanded}
+  onClick={toggleRegion}
+>
+  North America
+</button>
+
+{/* Child sections */}
+{regionExpanded && (
+  <>
+    <button
+      data-spr-expand-id="region-north-america/country-usa"
+      aria-expanded={usaExpanded}
+      onClick={toggleUsa}
+    >
+      United States
+    </button>
+
+    <button
+      data-spr-expand-id="region-north-america/country-canada"
+      aria-expanded={canadaExpanded}
+      onClick={toggleCanada}
+    >
+      Canada
+    </button>
+  </>
+)}
+```
+
+### Handling Async Expansion
+
+If expanding a section loads data asynchronously, add `data-transitioning` while loading:
+
+```tsx
+function AsyncExpandable({ id, title, loadData }: Props) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState(null);
+
+  const handleToggle = async () => {
+    if (!isExpanded && !data) {
+      setIsLoading(true);
+      const result = await loadData();
+      setData(result);
+      setIsLoading(false);
+    }
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <div>
+      <button
+        data-spr-expand-id={id}
+        aria-expanded={isExpanded}
+        data-transitioning={isLoading}  // Signals async operation in progress
+        onClick={handleToggle}
+      >
+        {title}
+      </button>
+
+      {isExpanded && (
+        <div>{isLoading ? 'Loading...' : <Content data={data} />}</div>
+      )}
+    </div>
+  );
+}
+```
+
+### How It Works
+
+When a user exports a PDF:
+
+1. **Capture** — Semaphor finds all elements with `data-spr-expand-id` and `aria-expanded`
+2. **Serialize** — The expanded state is serialized as JSON: `{ "category-123": true, "category-456": false }`
+3. **Pass to Lambda** — State is passed to the PDF generation Lambda
+4. **Restore** — Lambda clicks toggles to restore the exact expanded state
+5. **Render** — PDF is generated matching the user's view
+
+### Summary Table
+
+| Attribute | Required | Purpose |
+|-----------|----------|---------|
+| `data-spr-expand-id` | Yes | Unique identifier for the expandable element |
+| `aria-expanded` | Yes | Current expanded state (`"true"` or `"false"`) |
+| `data-transitioning` | Optional | Set to `"true"` during async expansion |
 
 ---
 

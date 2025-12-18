@@ -116,6 +116,47 @@ Render inline filters wherever appropriate:
 )}
 ```
 
+### Print State Protocol (PDF Export Support)
+
+When creating components with expandable sections (accordions, collapsible panels, expandable rows), follow this protocol so the expanded state is captured correctly in PDF exports.
+
+**Required attributes on toggle elements:**
+```tsx
+<button
+  data-spr-expand-id={uniqueStableId}  // Unique ID based on data (not random)
+  aria-expanded={isExpanded}            // Standard accessibility attribute
+  onClick={toggleExpand}
+>
+  Toggle Section
+</button>
+```
+
+**ID naming conventions:**
+```tsx
+// Good: Stable IDs based on data
+data-spr-expand-id={`category-${row.categoryId}`}
+data-spr-expand-id={`row-${rowIndex}-details`}
+
+// Bad: Unstable IDs
+data-spr-expand-id={Math.random()}
+```
+
+**For async expansion (loading data on expand):**
+```tsx
+<button
+  data-spr-expand-id={id}
+  aria-expanded={isExpanded}
+  data-transitioning={isLoading}  // Signals async operation in progress
+  onClick={handleToggle}
+>
+```
+
+**IMPORTANT:** When generating components with expandable sections:
+1. Always add `data-spr-expand-id` with a stable, data-derived ID
+2. Always add `aria-expanded` (also good for accessibility)
+3. Ensure the element responds to `.click()` events
+4. For nested expandables, use hierarchical IDs: `"parent-id/child-id"`
+
 ### Accessing Dashboard Filters
 
 Visuals receive `filters` (definitions) and `filterValues` (active selections):
