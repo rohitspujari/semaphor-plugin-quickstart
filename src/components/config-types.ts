@@ -79,9 +79,30 @@ export type SingleInputVisualProps = {
   filterValues?: ActiveFilterValue[];
 };
 
+export type TabMetadata = {
+  titles: string[];
+  cardTypes: string[];
+  cardIds: string[];
+};
+
+export type CardMetadata = {
+  cardType: string;
+  title: string;
+  kpiConfig?: {
+    comparisonMetadata?: Record<string, any>;
+    options?: {
+      lowerIsBetter?: boolean;
+      showTrendline?: boolean;
+      showComparison?: boolean;
+    };
+    formatNumber?: Record<string, any>;
+  };
+};
+
 export type MultiInputVisualProps = {
   data: DataArray;
   settings?: Record<string, string | number | boolean>[];
+  theme?: CustomCardTheme;
   /**
    * Pre-rendered inline filter components from the host application.
    * Render these wherever you want in your component layout.
@@ -100,6 +121,8 @@ export type MultiInputVisualProps = {
    * Use this to display what filters are currently applied.
    */
   filterValues?: ActiveFilterValue[];
+  tabMetadata?: TabMetadata;
+  cardMetadata?: CardMetadata[];
 };
 
 // ============================================
@@ -288,6 +311,16 @@ export type ComponentsConfig = {
     componentType: 'chart';
     icon?: string; // name of the icon (React Component) from lucide
     dataInputs?: string[];
+    visualType?: 'single' | 'multiple';
+    minInputs?: number;
+    maxInputs?: number;
+    slots?: Array<{
+      position: number | string;
+      label: string;
+      description?: string;
+      expectedType?: string | string[];
+      required?: boolean;
+    }>;
     settings?: Record<string, SettingConfig>;
     docs?: VisualDocumentation;
   }[];

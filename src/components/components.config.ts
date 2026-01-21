@@ -152,6 +152,49 @@ LIMIT 10
       },
     },
     {
+      name: 'Multi KPI Grid',
+      component: 'MultiKpiGrid',
+      componentType: 'chart',
+      chartType: 'multi-kpi-grid',
+      visualType: 'multiple',
+      icon: 'LayoutGrid',
+      minInputs: 1,
+      maxInputs: 12,
+      slots: [
+        {
+          position: '0+',
+          label: 'KPI',
+          description: 'Each tab renders as a KPI card.',
+          expectedType: 'kpi',
+          required: false,
+        },
+      ],
+      docs: {
+        description:
+          'A multi-input KPI grid that renders each tab as a KPI card with comparison metadata.',
+        dataSchema: `
+### Expected Data Format
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| segment | text | Yes | current, comparison, trendline |
+| value | number | Yes | KPI value for the segment |
+
+### Example Query
+\`\`\`sql
+SELECT 'current' AS segment, SUM(revenue) AS value FROM orders
+UNION ALL
+SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
+\`\`\`
+        `.trim(),
+        useCases: [
+          'KPI dashboards with multiple metrics',
+          'Comparison metrics with trend indicators',
+          'Multi-input custom visual examples',
+        ],
+      },
+    },
+    {
       name: 'Summary Table',
       component: 'SummaryTable',
       componentType: 'chart',

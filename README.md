@@ -361,6 +361,18 @@ See the existing component `.md` files for examples.
 
 ## Building Custom Visuals
 
+### Multi-input visuals and KPI metadata
+
+Multi-input visuals receive an array of datasets (one per tab). The host also passes
+`tabMetadata` and `cardMetadata` so you can label tiles and access KPI comparison data.
+This quickstart includes a `MultiKpiGrid` example and KPI helper utilities in
+`src/components/kpi-utils.ts`.
+
+**KPI date formatting note:** KPI comparison periods are sent as **date-only strings**
+already resolved with CalendarContext. Use the helpers in `kpi-utils.ts` (which format
+in UTC) to avoid off-by-one day shifts in browser timezones. If you ever format full
+timestamps (e.g., chart comparison metadata), use the appropriate display timezone instead.
+
 ### Step 1: Create Component Files
 
 ```bash
@@ -923,6 +935,61 @@ type SingleInputVisualProps = {
    */
   filterValues?: ActiveFilterValue[];
 };
+
+### MultiInputVisualProps
+
+Props received by multi-input custom visuals.
+
+```typescript
+type MultiInputVisualProps = {
+  /**
+   * Array of datasets, one per tab.
+   */
+  data: Record<string, string | number | boolean>[][];
+
+  /**
+   * Settings per tab, derived from each card's custom settings.
+   */
+  settings?: Record<string, string | number | boolean>[];
+
+  /**
+   * Metadata about tabs (titles, types, ids).
+   */
+  tabMetadata?: {
+    titles: string[];
+    cardTypes: string[];
+    cardIds: string[];
+  };
+
+  /**
+   * Rich per-tab metadata (KPI comparisons, formatting, labels).
+   */
+  cardMetadata?: Array<{
+    cardType: string;
+    title: string;
+    kpiConfig?: {
+      comparisonMetadata?: Record<string, any>;
+      options?: {
+        lowerIsBetter?: boolean;
+        showTrendline?: boolean;
+        showComparison?: boolean;
+      };
+      formatNumber?: Record<string, any>;
+    };
+  }>;
+
+  /**
+   * Inline filters rendered by Semaphor.
+   */
+  inlineFilters?: ReactNode[];
+
+  /**
+   * Dashboard filter definitions and active values.
+   */
+  filters?: DashboardFilter[];
+  filterValues?: ActiveFilterValue[];
+};
+```
 
 // Dashboard filter definition
 type DashboardFilter = {

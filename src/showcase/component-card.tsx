@@ -40,6 +40,8 @@ export function ComponentCard({ component, componentType }: ComponentCardProps) 
             data={dataModule.sampleData || []}
             settings={dataModule.sampleSettings}
             theme={dataModule.sampleTheme}
+            tabMetadata={dataModule.sampleTabMetadata}
+            cardMetadata={dataModule.sampleCardMetadata}
             inlineFilters={[]}
           />
         </div>

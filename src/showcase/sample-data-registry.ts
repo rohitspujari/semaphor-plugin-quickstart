@@ -3,6 +3,7 @@ import * as myTableData from '../components/semaphor-components/my-table/my-tabl
 import * as sankeyChartData from '../components/semaphor-components/sankey-chart/sankey-chart.data';
 import * as expandableTableData from '../components/semaphor-components/expandable-table/expandable-table.data';
 import * as chipFilterData from '../components/semaphor-components/chip-filter/chip-filter.data';
+import * as multiKpiGridData from '../components/semaphor-components/multi-kpi-grid/multi-kpi-grid.data';
 
 export const sampleDataRegistry: Record<
   string,
@@ -11,6 +12,8 @@ export const sampleDataRegistry: Record<
     sampleData?: any;
     sampleSettings?: any;
     sampleTheme?: any;
+    sampleTabMetadata?: any;
+    sampleCardMetadata?: any;
     // For filters
     sampleOptions?: any;
     sampleSelectedValues?: any;
@@ -21,6 +24,7 @@ export const sampleDataRegistry: Record<
   SankeyChart: sankeyChartData,
   SummaryTable: salesDashboardData,
   MyTable: myTableData,
+  MultiKpiGrid: multiKpiGridData,
   // Filters
   ChipFilter: chipFilterData,
 };
