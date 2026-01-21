@@ -35,6 +35,7 @@ Ask the user:
    - **Repeating Pattern** - All tabs same type, uniform guidance
    - **Fixed + Dynamic** - Specific first tab(s), then unlimited
    - **Fully Structured** - Exact positions with specific meanings
+4. **Does it use KPI data?** - If yes, will use the `segment` column convention (see KPI Data Structure section)
 
 Convert the name to:
 - **PascalCase** for component name (e.g., `RevenueChart`)
@@ -49,6 +50,50 @@ src/components/semaphor-components/{kebab-case-name}/
 ├── {kebab-case-name}.data.ts  # Sample data for Showcase
 └── {kebab-case-name}.md       # Component documentation
 ```
+
+---
+
+## Understanding Multi-Input Visuals
+
+This section explains HOW multi-input visuals work from the end-user's perspective in Semaphor. Understanding this helps you build components that match user expectations.
+
+### How Multi-Input Works in Semaphor
+
+When a user configures a multi-input visual in Semaphor's dashboard editor:
+
+1. **Select the visual**: User picks your custom visual from the chart type selector
+2. **Semaphor detects it's multi-input**: Based on `visualType: 'multiple'` in your config
+3. **Tabs appear**: The editor shows tabs at the top (Tab 1, Tab 2, etc.)
+4. **Configure each tab**: Each tab has its own:
+   - Data source selection
+   - SQL query or table selection
+   - Individual settings
+5. **Preview button**: User clicks Preview to see all tabs' data combined
+6. **Save**: All tab configurations are saved together as one card
+
+### The Data Your Component Receives
+
+```
+Tab 1 query runs → data[0]
+Tab 2 query runs → data[1]
+Tab 3 query runs → data[2]
+...
+```
+
+Your component receives:
+- `data`: Array of arrays - `data[0]` is Tab 1's query results, `data[1]` is Tab 2's, etc.
+- `tabMetadata.titles`: Array of tab titles the user entered
+- `tabMetadata.cardIds`: Unique IDs for React keys
+- `cardMetadata`: Rich metadata about each tab's configuration (see reference below)
+
+### What Users See vs What You Build
+
+| User Action | What Your Component Receives |
+|-------------|------------------------------|
+| Adds Tab 3 | `data` array grows to length 3 |
+| Names Tab 1 "Revenue" | `tabMetadata.titles[0]` = "Revenue" |
+| Configures Tab 2 as KPI | `cardMetadata[1].cardType` = "kpi" |
+| Sets "lower is better" | `cardMetadata[n].kpiConfig.options.lowerIsBetter` = true |
 
 ---
 
@@ -376,6 +421,98 @@ SELECT name AS label, amount AS value FROM table
 
 Use these templates when the user wants to create a visual that combines data from multiple tabs.
 
+### Understanding KPI Data Structure
+
+Semaphor's built-in KPI system returns data with a special `segment` column. If your multi-input visual works with KPI data, you should understand this convention:
+
+```
+| segment     | value  |
+|-------------|--------|
+| current     | 28494  |
+| comparison  | 45624  |
+| trendline   | 25000  |  (multiple rows for trend)
+| trendline   | 27000  |
+| trendline   | 28494  |
+```
+
+**Segment values:**
+- `current` - The main KPI value for the current period
+- `comparison` - The comparison period value (e.g., last month, last year)
+- `trendline` - Historical data points (if trendline is enabled)
+
+**When to use this structure:**
+- Your visual displays KPI-style metrics with comparisons
+- You want to leverage `cardMetadata.kpiConfig` for formatting and comparison labels
+
+**When NOT to use this structure:**
+- Your visual uses custom data shapes
+- Each tab returns different column structures
+- You're not showing KPI-style comparisons
+
+Use `parseKPIData(tabData)` from `kpi-utils.ts` to easily extract current/comparison values.
+
+### Full CardMetadata Reference
+
+When building KPI-aware visuals, `cardMetadata` provides rich context for each tab:
+
+```typescript
+// Full CardMetadata structure for each tab
+cardMetadata?.[index] = {
+  // Basic info
+  cardType: 'kpi',           // or 'bar', 'table', etc.
+  title: 'Revenue',          // Tab title the user entered
+
+  // KPI-specific configuration (only present for KPI card types)
+  kpiConfig: {
+    // Comparison metadata from the backend
+    comparisonMetadata: {
+      'comparison-id': {
+        type: 'previous_period',  // or 'same_period_last_year', 'target', 'start_vs_end'
+        displayLabel: 'vs Last Month',  // Human-readable label
+        displayName: 'Revenue',
+        currentPeriod: {
+          start: '2024-02-01',   // ISO date string
+          end: '2024-02-29'
+        },
+        comparisonPeriod: {
+          start: '2024-01-01',   // ISO date string
+          end: '2024-01-31'
+        }
+      }
+    },
+
+    // User-configured options
+    options: {
+      lowerIsBetter: false,    // If true, decreases are shown as positive
+      showComparison: true,    // Whether to show comparison value
+      showTrendline: false     // Whether trendline data is included
+    },
+
+    // Number formatting preferences
+    formatNumber: {
+      decimalPlaces: 2,
+      suffix: '%',             // e.g., '%', 'K', 'M'
+      locale: 'en-US',
+      currency: 'USD'          // If set, uses currency formatting
+    }
+  }
+};
+```
+
+**Accessing comparison metadata:**
+```typescript
+// Get the first (usually only) comparison entry
+const comparisonMeta = cardMetadata?.[index]?.kpiConfig?.comparisonMetadata
+  ? Object.values(cardMetadata[index].kpiConfig.comparisonMetadata)[0]
+  : undefined;
+
+// Now you can access:
+comparisonMeta?.type           // 'previous_period', 'same_period_last_year', etc.
+comparisonMeta?.displayLabel   // 'vs Last Month'
+comparisonMeta?.comparisonPeriod?.start  // '2024-01-01'
+comparisonMeta?.comparisonPeriod?.end    // '2024-01-31'
+```
+
 ### Component Template (Multi-Input)
 
 ```tsx
@@ -390,16 +527,23 @@ import { MultiInputVisualProps } from '../../config-types';
  * - data[0] = first tab's records
  * - data[1] = second tab's records
  * - tabMetadata.titles[n] = tab n's title
+ * - cardMetadata[n] = rich metadata for tab n (KPI config, formatting, etc.)
+ *
+ * The `editing` prop is true when shown in the editor's Preview modal.
+ * Use it to show helpful context like "Preview Mode" or tab count.
  */
 export function {PascalCaseName}({
-  data,
+  data = [],
   settings,
   theme,
   tabMetadata,
   cardMetadata,
   editing = false,
 }: MultiInputVisualProps) {
-  // Handle empty state
+  // ==========================================
+  // EMPTY STATE HANDLING
+  // ==========================================
+  // Handle no data at all
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground">
@@ -408,14 +552,14 @@ export function {PascalCaseName}({
     );
   }
 
-  // Theme colors
+  // Theme colors - use these for consistent styling
   const colors = theme?.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
   return (
     <div className="flex flex-col h-full p-4">
-      {/* Editor mode indicator */}
+      {/* Editor mode indicator - helps users understand they're in preview */}
       {editing && (
-        <div className="text-xs text-muted-foreground mb-2">
+        <div className="text-xs text-muted-foreground mb-2 px-2 py-1 bg-muted rounded">
           Preview Mode - {data.length} tab(s) configured
         </div>
       )}
@@ -423,8 +567,23 @@ export function {PascalCaseName}({
       {/* Render data from each tab */}
       <div className="grid grid-cols-4 gap-4">
         {data.map((tabData, index) => {
+          // Get metadata for this tab
           const title = tabMetadata?.titles?.[index] || `Tab ${index + 1}`;
           const meta = cardMetadata?.[index];
+
+          // Handle empty tab data gracefully
+          if (!tabData || tabData.length === 0) {
+            return (
+              <div
+                key={tabMetadata?.cardIds?.[index] ?? index}
+                className="p-4 rounded-lg border border-dashed text-muted-foreground text-sm"
+              >
+                {title}: No data
+              </div>
+            );
+          }
+
+          // Extract first value (customize based on your data shape)
           const firstRow = tabData[0] || {};
           const value = Object.values(firstRow)[0];
 
@@ -451,8 +610,9 @@ export function {PascalCaseName}({
 
 ```typescript
 // Multi-input sample data - array of data arrays
+// Each inner array represents one tab's query results
 export const sampleData = [
-  // Tab 0 data
+  // Tab 0 data - uses KPI segment convention
   [{ segment: 'current', value: 28494 }, { segment: 'comparison', value: 45624 }],
   // Tab 1 data
   [{ segment: 'current', value: 73.8 }, { segment: 'comparison', value: 72.0 }],
@@ -462,17 +622,46 @@ export const sampleData = [
   [{ segment: 'current', value: 0 }, { segment: 'comparison', value: 10 }],
 ];
 
+// Tab metadata - matches what Semaphor passes from tab configuration
 export const sampleTabMetadata = {
   titles: ['Labour Gross', 'Lbr Grs %', 'Labour Sale', 'Discounts'],
   cardTypes: ['kpi', 'kpi', 'kpi', 'kpi'],
-  cardIds: ['card-1', 'card-2', 'card-3', 'card-4'],
+  cardIds: ['card-1', 'card-2', 'card-3', 'card-4'],  // Use for React keys
 };
 
+// Card metadata - rich context for each tab
 export const sampleCardMetadata = [
-  { cardType: 'kpi', title: 'Labour Gross', kpiConfig: { options: { lowerIsBetter: false } } },
-  { cardType: 'kpi', title: 'Lbr Grs %', kpiConfig: { options: { lowerIsBetter: false } } },
-  { cardType: 'kpi', title: 'Labour Sale', kpiConfig: { options: { lowerIsBetter: true } } },
-  { cardType: 'kpi', title: 'Discounts', kpiConfig: { options: { lowerIsBetter: true } } },
+  {
+    cardType: 'kpi',
+    title: 'Labour Gross',
+    kpiConfig: {
+      options: { lowerIsBetter: false, showComparison: true },
+      comparisonMetadata: {
+        'cmp-1': {
+          type: 'previous_period',
+          displayLabel: 'vs Last Month',
+        }
+      }
+    }
+  },
+  {
+    cardType: 'kpi',
+    title: 'Lbr Grs %',
+    kpiConfig: {
+      options: { lowerIsBetter: false, showComparison: true },
+      formatNumber: { suffix: '%', decimalPlaces: 1 }
+    }
+  },
+  {
+    cardType: 'kpi',
+    title: 'Labour Sale',
+    kpiConfig: { options: { lowerIsBetter: true, showComparison: true } }
+  },
+  {
+    cardType: 'kpi',
+    title: 'Discounts',
+    kpiConfig: { options: { lowerIsBetter: true, showComparison: true } }
+  },
 ];
 
 export const sampleSettings = {};
@@ -487,6 +676,8 @@ export const sampleTheme = {
 
 #### Mode 1: Fully Dynamic (No Slots)
 
+Use when all tabs are treated equally with no specific structure.
+
 ```typescript
 {
   name: '{Display Name}',
@@ -497,7 +688,7 @@ export const sampleTheme = {
   visualType: 'multiple',
   minInputs: 1,
   maxInputs: 20,
-  // No slots array - fully dynamic
+  // No slots array - fully dynamic, any number of tabs
   docs: {
     description: '{Description}. Add as many tabs as needed.',
     dataSchema: `### Flexible Multi-Input\nEach tab renders as an equal item.`,
@@ -507,6 +698,8 @@ export const sampleTheme = {
 ```
 
 #### Mode 2: Repeating Pattern
+
+Use when all tabs should be the same type (e.g., all KPIs).
 
 ```typescript
 {
@@ -520,10 +713,10 @@ export const sampleTheme = {
   maxInputs: 12,
   slots: [
     {
-      position: '0+',
+      position: '0+',       // Applies to ALL positions (0, 1, 2, ...)
       label: 'KPI',
       description: 'Each tab renders as a KPI card.',
-      expectedType: 'kpi',
+      expectedType: 'kpi',  // Hint to users about expected card type
     },
   ],
   docs: { /* ... */ },
@@ -531,6 +724,8 @@ export const sampleTheme = {
 ```
 
 #### Mode 3: Fixed + Dynamic
+
+Use when you have specific first slot(s) with meaning, then unlimited additional slots.
 
 ```typescript
 {
@@ -551,7 +746,7 @@ export const sampleTheme = {
       required: true,
     },
     {
-      position: '1+',
+      position: '1+',        // Applies to positions 1, 2, 3, ...
       label: 'Supporting',
       description: 'Additional metrics in grid.',
       expectedType: 'kpi',
@@ -563,6 +758,8 @@ export const sampleTheme = {
 
 #### Mode 4: Fully Structured
 
+Use when you need exact positions with specific meanings.
+
 ```typescript
 {
   name: '{Display Name}',
@@ -572,11 +769,11 @@ export const sampleTheme = {
   icon: 'GitCompare',
   visualType: 'multiple',
   minInputs: 3,
-  maxInputs: 3,
+  maxInputs: 3,             // Exact number required
   slots: [
-    { position: 0, label: 'Current', required: true },
-    { position: 1, label: 'Previous', required: true },
-    { position: 2, label: 'Target', required: true },
+    { position: 0, label: 'Current', description: 'Current period value', required: true },
+    { position: 1, label: 'Previous', description: 'Previous period value', required: true },
+    { position: 2, label: 'Target', description: 'Target/goal value', required: true },
   ],
   docs: { /* ... */ },
 },
@@ -584,7 +781,7 @@ export const sampleTheme = {
 
 ### KPI Utilities (Multi-Input)
 
-For KPI-specific multi-input visuals, use the helper utilities:
+For KPI-specific multi-input visuals, use the helper utilities from `kpi-utils.ts`:
 
 ```typescript
 import {
@@ -592,28 +789,205 @@ import {
   getPercentChange,
   formatKPIValue,
   getComparisonLabel,
+  formatDateRange,
+  formatDateShort,
 } from '../../kpi-utils';
 
-// Parse KPI data from each tab
-const { currentValue, comparisonValue } = parseKPIData(tabData);
+// Inside your component, for each tab:
+data.map((tabData, index) => {
+  const meta = cardMetadata?.[index];
 
-// Calculate change with lowerIsBetter support
-const change = getPercentChange(
-  Number(currentValue ?? 0),
-  Number(comparisonValue ?? 0),
-  meta?.kpiConfig?.options?.lowerIsBetter
-);
+  // Parse KPI data - extracts current/comparison from segment column
+  const { currentValue, comparisonValue, trendlineData } = parseKPIData(tabData);
 
-// Format value with currency/locale
-const formatted = formatKPIValue(Number(currentValue ?? 0), meta?.kpiConfig?.formatNumber);
+  // Calculate change with lowerIsBetter support
+  const change = getPercentChange(
+    Number(currentValue ?? 0),
+    Number(comparisonValue ?? 0),
+    meta?.kpiConfig?.options?.lowerIsBetter
+  );
+  // Returns: { value: -37.5, isPositive: false, isBetter: true, isNeutral: false }
 
-// Get comparison label from metadata
-const comparisonLabel = getComparisonLabel(
-  meta?.kpiConfig?.comparisonMetadata
+  // Format value with currency/locale/suffix from card preferences
+  const formatted = formatKPIValue(
+    Number(currentValue ?? 0),
+    meta?.kpiConfig?.formatNumber
+  );
+  // Returns: "$28,494" or "73.8%" depending on config
+
+  // Get comparison label from metadata
+  const comparisonMeta = meta?.kpiConfig?.comparisonMetadata
     ? Object.values(meta.kpiConfig.comparisonMetadata)[0]
-    : undefined
-);
+    : undefined;
+  const comparisonLabel = getComparisonLabel(comparisonMeta);
+  // Returns: "vs Last Month" or "vs Same Period Last Year"
+
+  // Format comparison date range (always UTC to preserve logical dates)
+  if (comparisonMeta?.comparisonPeriod) {
+    const dateRange = formatDateShort(
+      comparisonMeta.comparisonPeriod.start,
+      comparisonMeta.comparisonPeriod.end
+    );
+    // Returns: "Jan 1 - Jan 31, 2024"
+  }
+});
 ```
+
+**Why UTC for dates?** KPI comparison dates are logical calendar dates resolved on the backend. Formatting in UTC prevents browser timezone shifting (e.g., "Jan 14" becoming "Jan 13" in PST).
+
+### Edge Case Handling
+
+Your multi-input component should handle these scenarios gracefully:
+
+```typescript
+export function MyMultiInputVisual({
+  data = [],
+  tabMetadata,
+  cardMetadata,
+}: MultiInputVisualProps) {
+
+  // 1. No data at all
+  if (!data || data.length === 0) {
+    return <EmptyState message="Add tabs to see visualization" />;
+  }
+
+  // 2. Fewer tabs than expected (for structured visuals)
+  const expectedTabs = 3; // If your visual expects exactly 3
+  if (data.length < expectedTabs) {
+    return (
+      <EmptyState
+        message={`This visual requires ${expectedTabs} tabs. Currently ${data.length} configured.`}
+      />
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-4 gap-4">
+      {data.map((tabData, index) => {
+        // 3. Individual empty tab
+        if (!tabData || tabData.length === 0) {
+          return (
+            <div key={tabMetadata?.cardIds?.[index] ?? index} className="empty-tab">
+              {tabMetadata?.titles?.[index] || `Tab ${index + 1}`}: No data
+            </div>
+          );
+        }
+
+        // 4. Missing metadata (defensive access)
+        const title = tabMetadata?.titles?.[index] ?? `Tab ${index + 1}`;
+        const meta = cardMetadata?.[index];
+        const lowerIsBetter = meta?.kpiConfig?.options?.lowerIsBetter ?? false;
+
+        return (
+          <div key={tabMetadata?.cardIds?.[index] ?? index}>
+            {/* Render tab content */}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+### Practical Example: Current vs Previous vs Target
+
+Here's a complete example of building a structured 3-slot comparison visual:
+
+**User request:** "Create a visual that shows Current value, Previous period, and Target side by side"
+
+**1. Config entry (Mode 4: Fully Structured):**
+
+```typescript
+{
+  name: 'Comparison Card',
+  component: 'ComparisonCard',
+  componentType: 'chart',
+  chartType: 'comparison-card',
+  icon: 'GitCompare',
+  visualType: 'multiple',
+  minInputs: 3,
+  maxInputs: 3,
+  slots: [
+    { position: 0, label: 'Current', description: 'Current period value', required: true },
+    { position: 1, label: 'Previous', description: 'Previous period for comparison', required: true },
+    { position: 2, label: 'Target', description: 'Target/goal value', required: true },
+  ],
+  docs: {
+    description: 'Compare current performance against previous period and target.',
+    dataSchema: `Each tab should return a single numeric value.`,
+    useCases: ['KPI comparison', 'Goal tracking'],
+  },
+},
+```
+
+**2. Component:**
+
+```tsx
+import { MultiInputVisualProps } from '../../config-types';
+import { parseKPIData, formatKPIValue, getPercentChange } from '../../kpi-utils';
+
+export function ComparisonCard({
+  data = [],
+  tabMetadata,
+  cardMetadata,
+  theme,
+}: MultiInputVisualProps) {
+  // Require exactly 3 tabs
+  if (data.length < 3) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        Configure all 3 tabs: Current, Previous, and Target
+      </div>
+    );
+  }
+
+  // Extract values from each tab
+  const { currentValue } = parseKPIData(data[0]);    // Tab 0 = Current
+  const { currentValue: prevValue } = parseKPIData(data[1]);   // Tab 1 = Previous
+  const { currentValue: targetValue } = parseKPIData(data[2]); // Tab 2 = Target
+
+  const current = Number(currentValue ?? 0);
+  const previous = Number(prevValue ?? 0);
+  const target = Number(targetValue ?? 0);
+
+  const vsPrev = getPercentChange(current, previous);
+  const vsTarget = getPercentChange(current, target);
+
+  const formatConfig = cardMetadata?.[0]?.kpiConfig?.formatNumber;
+
+  return (
+    <div className="p-6 space-y-4">
+      <div className="text-3xl font-bold">
+        {formatKPIValue(current, formatConfig)}
+      </div>
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className={vsPrev.isBetter ? 'text-green-600' : 'text-red-600'}>
+            {vsPrev.isPositive ? '↑' : '↓'} {Math.abs(vsPrev.value ?? 0).toFixed(1)}%
+          </span>
+          <span className="text-muted-foreground ml-2">vs Previous</span>
+        </div>
+        <div>
+          <span className={vsTarget.isBetter ? 'text-green-600' : 'text-red-600'}>
+            {vsTarget.isPositive ? '↑' : '↓'} {Math.abs(vsTarget.value ?? 0).toFixed(1)}%
+          </span>
+          <span className="text-muted-foreground ml-2">vs Target</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+**3. How users configure this in Semaphor:**
+
+1. Select "Comparison Card" from chart picker
+2. Editor shows 3 required tabs: "Current", "Previous", "Target"
+3. For Tab 1 (Current): Configure query for current period value
+4. For Tab 2 (Previous): Configure query for previous period value
+5. For Tab 3 (Target): Configure query for target value
+6. Click Preview to see combined result
+7. Save
 
 ---
 
@@ -650,8 +1024,10 @@ import * as {camelCaseName}Data from '../components/semaphor-components/{kebab-c
 
 Tell the user:
 1. Run `npm run dev` to start the Showcase
-2. Check that the component appears and renders correctly
-3. Verify documentation displays properly
+2. Find your component in the sidebar
+3. Check that it renders correctly with sample data
+4. For multi-input: Verify all "tabs" display correctly (the Showcase passes `sampleTabMetadata` and `sampleCardMetadata` automatically)
+5. Verify documentation displays properly in the Doc panel
 
 ---
 
@@ -667,7 +1043,7 @@ The component name must match EXACTLY across:
 
 ### Available Icons
 
-Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashboard`, `TrendingUp`, `Activity`, `LayoutGrid`, `GitCompare`
+Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashboard`, `TrendingUp`, `Activity`, `LayoutGrid`, `GitCompare`, `TableProperties`, `GitBranch`
 
 ### Single-Input vs Multi-Input Differences
 
@@ -676,11 +1052,12 @@ Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashbo
 | Props type | `SingleInputVisualProps` | `MultiInputVisualProps` |
 | Data shape | `data: Data` (single array) | `data: DataArray` (array of arrays) |
 | Config | No `visualType` needed | `visualType: 'multiple'` required |
-| Slots | N/A | Optional `slots` array |
+| Slots | N/A | Optional `slots` array for guidance |
 | Sample data | Single data array | Array of data arrays + `sampleTabMetadata` + `sampleCardMetadata` |
 | Key prop | Use `index` | Use `tabMetadata?.cardIds?.[index] ?? index` |
+| Metadata | Basic settings only | Rich `cardMetadata` with KPI config |
 
 ### Reference Examples
 
 - **Single-Input**: See `my-table` component for a complete working example
-- **Multi-Input**: See `multi-kpi-grid` component for a complete working example
+- **Multi-Input**: See `multi-kpi-grid` component for a complete working example with KPI utilities
