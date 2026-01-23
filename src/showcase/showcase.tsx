@@ -87,6 +87,7 @@ export function Showcase() {
                 component={selected}
                 componentType={activeTab}
                 sampleData={sampleDataRegistry[selected.component]?.sampleData}
+                sampleTabMetadata={sampleDataRegistry[selected.component]?.sampleTabMetadata}
               />
             </div>
           )}

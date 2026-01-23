@@ -33,26 +33,41 @@ const markdownComponents: Components = {
   pre: ({ children }) => <>{children}</>,
 };
 
+type Slot = {
+  position: number | string;
+  label: string;
+  description?: string;
+};
+
 type DocPanelProps = {
   component: {
     name: string;
     docs?: { description: string; dataSchema?: string; useCases?: string[] };
     settings?: Record<string, SettingConfig>;
     supportedDataTypes?: string[];
+    visualType?: 'single' | 'multiple';
+    slots?: Slot[];
   };
   componentType: 'visuals' | 'filters';
-  sampleData?: Record<string, unknown>[];
+  sampleData?: Record<string, unknown>[] | Record<string, unknown>[][];
+  sampleTabMetadata?: { titles?: string[] };
 };
 
-export function DocPanel({ component, componentType, sampleData }: DocPanelProps) {
+export function DocPanel({ component, componentType, sampleData, sampleTabMetadata }: DocPanelProps) {
   const { docs, settings } = component;
 
-  // Render sample data as a scrollable table
-  const renderSampleDataTable = () => {
-    if (!sampleData || sampleData.length === 0) return null;
-    const columns = Object.keys(sampleData[0]);
+  // Check if this is multi-input data (array of arrays)
+  const isMultiInput = component.visualType === 'multiple' &&
+    Array.isArray(sampleData) &&
+    sampleData.length > 0 &&
+    Array.isArray(sampleData[0]);
+
+  // Render a single data table
+  const renderDataTable = (data: Record<string, unknown>[]) => {
+    if (!data || data.length === 0) return <p className="text-sm text-muted-foreground italic">No data</p>;
+    const columns = Object.keys(data[0]);
     return (
-      <div className="max-h-48 overflow-auto rounded-md border border-border">
+      <div className="max-h-40 overflow-auto rounded-md border border-border">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-muted sticky top-0">
             <tr>
@@ -64,7 +79,7 @@ export function DocPanel({ component, componentType, sampleData }: DocPanelProps
             </tr>
           </thead>
           <tbody>
-            {sampleData.map((row, i) => (
+            {data.map((row, i) => (
               <tr key={i} className="hover:bg-muted/50">
                 {columns.map((col) => (
                   <td key={col} className="border-b border-border px-3 py-2">
@@ -77,6 +92,44 @@ export function DocPanel({ component, componentType, sampleData }: DocPanelProps
         </table>
       </div>
     );
+  };
+
+  // Render sample data - handles both single and multi-input visuals
+  const renderSampleDataTable = () => {
+    if (!sampleData || sampleData.length === 0) return null;
+
+    // Multi-input visual: show each tab's data separately
+    if (isMultiInput) {
+      const dataArrays = sampleData as Record<string, unknown>[][];
+      return (
+        <div className="space-y-4">
+          {dataArrays.map((tabData, index) => {
+            // Get slot label or tab title
+            const slot = component.slots?.find(s =>
+              s.position === index || s.position === `${index}+` || s.position === '0+'
+            );
+            const tabTitle = sampleTabMetadata?.titles?.[index];
+            const label = slot?.label || tabTitle || `Tab ${index + 1}`;
+            const description = slot?.description;
+
+            return (
+              <div key={index} className="space-y-2">
+                <div>
+                  <span className="font-medium text-sm">{label}</span>
+                  {description && (
+                    <span className="text-xs text-muted-foreground ml-2">— {description}</span>
+                  )}
+                </div>
+                {renderDataTable(tabData)}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Single-input visual: show data directly
+    return renderDataTable(sampleData as Record<string, unknown>[]);
   };
 
   return (

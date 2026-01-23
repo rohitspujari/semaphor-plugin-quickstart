@@ -1061,3 +1061,59 @@ Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashbo
 
 - **Single-Input**: See `my-table` component for a complete working example
 - **Multi-Input**: See `multi-kpi-grid` component for a complete working example with KPI utilities
+
+---
+
+## Embedded Plugin Constraints
+
+These plugins are rendered inside a parent application (Semaphor). This creates CSS scoping issues:
+
+### DO NOT use CSS variables for colors
+
+**BAD - Will not work when embedded:**
+```tsx
+// ChartContainer generates CSS variables that won't be accessible
+<Area stroke={`var(--color-${key})`} />
+<stop stopColor={`var(--color-revenue)`} />
+```
+
+**GOOD - Use direct color values:**
+```tsx
+const colors = theme?.colors || ['#3b82f6', '#10b981', '#f59e0b'];
+
+<Area stroke={colors[index % colors.length]} />
+<stop stopColor={colors[0]} />
+```
+
+### ChartContainer and ChartTooltip
+
+You CAN use `ChartContainer`, `ChartTooltip`, and `ChartTooltipContent` from `ui/chart.tsx` for nice tooltips - just don't rely on the CSS variables for SVG colors:
+
+```tsx
+// This works - ChartContainer for tooltips, but direct colors for chart elements
+<ChartContainer config={chartConfig} className="h-full w-full">
+  <AreaChart data={data}>
+    <Area
+      stroke={colors[index]}           // Direct color ✓
+      fill={`url(#${gradientId})`}     // Reference gradient by ID ✓
+    />
+    <defs>
+      <linearGradient id={gradientId}>
+        <stop stopColor={colors[index]} />  // Direct color ✓
+      </linearGradient>
+    </defs>
+    <ChartTooltip content={<ChartTooltipContent />} />  // Tooltips work ✓
+  </AreaChart>
+</ChartContainer>
+```
+
+### Why this happens
+
+The `ChartContainer` component generates CSS like:
+```css
+[data-chart=chart-abc123] {
+  --color-revenue: #3b82f6;
+}
+```
+
+But when embedded in Semaphor, the parent app's CSS isolation prevents these selectors from matching, so `var(--color-revenue)` resolves to nothing.

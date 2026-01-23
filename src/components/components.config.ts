@@ -195,6 +195,74 @@ SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
       },
     },
     {
+      name: 'KPI Area Chart',
+      component: 'KpiAreaChart',
+      componentType: 'chart',
+      chartType: 'kpi-area-chart',
+      visualType: 'multiple',
+      icon: 'TrendingUp',
+      minInputs: 2,
+      maxInputs: 2,
+      slots: [
+        {
+          position: 0,
+          label: 'KPI',
+          description: 'KPI metric with current/comparison values using segment convention.',
+          expectedType: 'kpi',
+          required: true,
+        },
+        {
+          position: 1,
+          label: 'Trend Data',
+          description: 'Time series data (1st col = label, remaining cols = series values).',
+          required: true,
+        },
+      ],
+      docs: {
+        description:
+          'A multi-input visual combining a KPI header with a multi-series gradient area chart. Supports multiple trend lines.',
+        dataSchema: `
+### Slot 0: KPI Data (Segment Convention)
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| segment | text | Yes | \`current\` or \`comparison\` |
+| value | number | Yes | KPI value |
+
+### Slot 1: Trend Data (Multi-Series)
+
+| Position | Purpose | Required |
+|----------|---------|----------|
+| 1st column | Label (date/month) | Yes |
+| 2nd+ columns | Series values | Yes (at least one) |
+
+Each column after the first becomes a separate area with its own color.
+
+### Example Queries
+**KPI Tab:**
+\`\`\`sql
+SELECT 'current' AS segment, SUM(revenue) AS value FROM orders
+UNION ALL
+SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
+\`\`\`
+
+**Trend Tab (Multi-Series):**
+\`\`\`sql
+SELECT TO_CHAR(order_date, 'Mon') AS month,
+       SUM(revenue) AS revenue,
+       SUM(profit) AS profit,
+       COUNT(*) AS orders
+FROM orders GROUP BY 1 ORDER BY MIN(order_date)
+\`\`\`
+        `.trim(),
+        useCases: [
+          'Revenue or sales KPIs with historical trend',
+          'Multi-metric comparison (revenue vs profit vs orders)',
+          'Performance metrics with monthly/weekly breakdown',
+        ],
+      },
+    },
+    {
       name: 'Summary Table',
       component: 'SummaryTable',
       componentType: 'chart',

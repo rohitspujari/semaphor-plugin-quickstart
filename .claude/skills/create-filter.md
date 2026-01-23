@@ -238,3 +238,16 @@ Common Lucide icons for filters:
 - `Filter`, `Layers`, `Tags`, `Sliders`
 - `Calendar`, `CalendarRange`
 - `Search`, `ListFilter`, `SlidersHorizontal`
+
+## Styling Note
+
+These plugins render inside Semaphor (a parent application). Tailwind classes work correctly when embedded. If you need dynamic colors, use direct values from `theme?.colors` rather than CSS variables:
+
+```tsx
+// DON'T - CSS variables may not work when embedded
+<div style={{ color: 'var(--custom-color)' }} />
+
+// DO - Use direct color values
+const primaryColor = theme?.colors?.[0] || '#3b82f6';
+<div style={{ color: primaryColor }} />
+```

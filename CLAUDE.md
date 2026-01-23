@@ -247,6 +247,28 @@ const count = Number(settings?.count) || 10;
 const enabled = settings?.enabled !== 'false';
 ```
 
+### Critical: Styling for Embedded Plugins
+
+**These plugins render inside Semaphor (a parent application).** CSS variables don't work reliably due to scoping:
+
+```tsx
+// DON'T - CSS variables fail when embedded
+<Area stroke={`var(--color-${key})`} />
+
+// DO - Use direct color values
+const colors = theme?.colors || ['#3b82f6', '#10b981'];
+<Area stroke={colors[index % colors.length]} />
+```
+
+**Safe to use:**
+- Tailwind classes (`bg-primary`, `text-muted-foreground`)
+- Direct color values (`#3b82f6`, `colors[0]`)
+- `ChartContainer`/`ChartTooltip` for tooltip styling
+
+**Avoid for SVG elements:**
+- `var(--color-*)` CSS variables
+- Any dynamically generated CSS custom properties
+
 ### Documentation in Config
 
 Define docs inline in `components.config.ts`:
