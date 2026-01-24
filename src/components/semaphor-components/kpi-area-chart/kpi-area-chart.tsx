@@ -27,6 +27,7 @@ import {
  */
 export function KpiAreaChart({
   data = [],
+  slotSettings,
   tabMetadata,
   cardMetadata,
   theme,
@@ -71,9 +72,18 @@ export function KpiAreaChart({
       : undefined
   );
 
-  // Get title from metadata
+  // Get title and description following the settings fallback pattern:
+  // 1. slotSettings (user-configured per-slot)
+  // 2. cardMetadata (card context from Semaphor)
+  // 3. tabMetadata (tab names)
+  // 4. Default
   const title =
-    meta?.title || tabMetadata?.titles?.[0] || 'KPI';
+    (slotSettings?.[0]?.title as string) ||
+    meta?.title ||
+    tabMetadata?.titles?.[0] ||
+    'KPI';
+  const description =
+    (slotSettings?.[0]?.description as string) || meta?.description;
 
   // Detect series columns (all columns after the first one)
   const { chartData, seriesKeys, labelKey } = useMemo(() => {
@@ -123,6 +133,11 @@ export function KpiAreaChart({
         <div className="text-sm text-muted-foreground font-medium">
           {title}
         </div>
+        {description && (
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {description}
+          </div>
+        )}
         <div className="text-3xl font-bold mt-1">
           {formatKPIValue(currentNumber, meta?.kpiConfig?.formatNumber)}
         </div>

@@ -173,7 +173,7 @@ Plugins control their settings via the manifest. Multi-input visuals support two
 | **Global** | Entire visual | `settings` | `settings` |
 | **Per-slot** | Individual tabs | `slotSettings` | `slotSettings[]` |
 
-**Convention-based defaults**: Settings named `title` or `description` auto-fill from card values:
+**Convention-based defaults**: Settings named `title` or `description` auto-fill from card values. Use the complete fallback pattern:
 
 ```typescript
 // Manifest
@@ -181,8 +181,19 @@ slotSettings: {
   title: { title: 'Title', defaultValue: '', ui: 'input' }
 }
 
-// Component - always fall back to cardMetadata
-const title = slotSettings?.[index]?.title || cardMetadata?.[index]?.title || 'Default';
+// Component - complete fallback pattern (4 levels):
+// 1. slotSettings  - user-configured per-slot
+// 2. cardMetadata  - card context from Semaphor
+// 3. tabMetadata   - tab names
+// 4. Default       - hardcoded fallback
+const title =
+  slotSettings?.[index]?.title ||
+  cardMetadata?.[index]?.title ||
+  tabMetadata?.titles?.[index] ||
+  'Default';
+const description =
+  slotSettings?.[index]?.description ||
+  cardMetadata?.[index]?.description;
 ```
 
 **UI-only defaults (not persisted)**:

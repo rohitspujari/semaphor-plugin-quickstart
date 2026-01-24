@@ -484,19 +484,30 @@ slotSettings?.[1]?.title     // Per-slot - for slot 1
 
 ### Title/Description Convention
 
-**Important**: For settings named `title` or `description`, Semaphor automatically pre-fills values from the card:
+**Important**: For settings named `title` or `description`, Semaphor automatically pre-fills values from the card. Use the complete fallback pattern:
 
 ```typescript
-// If manifest defines:
-slotSettings: {
-  title: { title: 'Title', defaultValue: '', ui: 'input' }
-}
+// Settings fallback pattern (priority order):
+// 1. slotSettings  - user-configured per-slot settings
+// 2. cardMetadata  - card context from Semaphor (title, description, kpiConfig)
+// 3. tabMetadata   - tab names from user configuration
+// 4. Default       - hardcoded fallback
 
-// User sees the card's title pre-filled in the UI
-// If they don't change it, slotSettings[n]?.title may be undefined
-// Always fall back to cardMetadata:
-const title = slotSettings?.[index]?.title || cardMetadata?.[index]?.title || 'Default';
+const title =
+  slotSettings?.[index]?.title ||
+  cardMetadata?.[index]?.title ||
+  tabMetadata?.titles?.[index] ||
+  'Default';
+const description =
+  slotSettings?.[index]?.description ||
+  cardMetadata?.[index]?.description;
 ```
+
+**Why all four levels?**
+- `slotSettings` may be undefined if user didn't override the auto-filled value
+- `cardMetadata` provides the card's configured title/description
+- `tabMetadata.titles` is the tab name the user entered
+- Default ensures something always displays
 
 This ensures consistency - the visual title matches the card title by default.
 
@@ -678,8 +689,16 @@ export function {PascalCaseName}({
 
           // Get metadata for this tab (read-only context from Semaphor)
           const meta = cardMetadata?.[index];
-          const title = slotTitle || meta?.title || tabMetadata?.titles?.[index] || `Tab ${index + 1}`;
-          const description = meta?.description;
+
+          // Settings fallback pattern: slotSettings → cardMetadata → tabMetadata → default
+          const title =
+            slotTitle ||
+            meta?.title ||
+            tabMetadata?.titles?.[index] ||
+            `Tab ${index + 1}`;
+          const description =
+            (slotSetting?.description as string) ||
+            meta?.description;
 
           // Handle empty tab data gracefully
           if (!tabData || tabData.length === 0) {
