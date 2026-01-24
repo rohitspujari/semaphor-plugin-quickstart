@@ -28,6 +28,7 @@ export type CustomCardTheme = {
 export type SingleInputVisualProps = {
   data: Data;
   settings?: Record<string, string | number | boolean>;
+  cardMetadata?: CardMetadata;
   theme?: CustomCardTheme;
   /**
    * Pre-rendered inline filter components from the host application.
@@ -88,6 +89,7 @@ export type TabMetadata = {
 export type CardMetadata = {
   cardType: string;
   title: string;
+  description?: string;
   kpiConfig?: {
     comparisonMetadata?: Record<string, any>;
     options?: {
@@ -101,7 +103,8 @@ export type CardMetadata = {
 
 export type MultiInputVisualProps = {
   data: DataArray;
-  settings?: Record<string, string | number | boolean>[];
+  settings?: Record<string, string | number | boolean>;
+  slotSettings?: Array<Record<string, string | number | boolean> | undefined>;
   theme?: CustomCardTheme;
   /**
    * Pre-rendered inline filter components from the host application.
@@ -322,6 +325,7 @@ export type ComponentsConfig = {
       required?: boolean;
     }>;
     settings?: Record<string, SettingConfig>;
+    slotSettings?: Record<string, SettingConfig>;
     docs?: VisualDocumentation;
   }[];
   filters?: {

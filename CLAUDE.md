@@ -108,16 +108,44 @@ data.map((row) => row.label); // Must have column named "label"
 
 ### Component Props
 
-**Visuals** receive:
+**Single-Input Visuals** receive:
 
 ```typescript
 type SingleInputVisualProps = {
   data: Record<string, string | number | boolean>[];
   settings?: Record<string, string | number | boolean>;
+  cardMetadata?: CardMetadata;  // Card context (title, description, kpiConfig)
   theme?: { colors: string[]; mode: 'light' | 'dark' | 'system' };
   inlineFilters?: ReactNode[]; // Pre-rendered inline filter components
   filters?: DashboardFilter[]; // Filter definitions (metadata)
   filterValues?: ActiveFilterValue[]; // Active filter selections
+};
+
+type CardMetadata = {
+  cardType: string;       // 'kpi', 'bar', 'line', etc.
+  title: string;          // Card title
+  description?: string;   // Card description
+  kpiConfig?: {           // KPI-specific (only for KPI cards)
+    comparisonMetadata?: Record<string, any>;
+    options?: { lowerIsBetter?: boolean; showTrendline?: boolean; showComparison?: boolean };
+    formatNumber?: Record<string, any>;
+  };
+};
+```
+
+**Multi-Input Visuals** receive:
+
+```typescript
+type MultiInputVisualProps = {
+  data: Record<string, string | number | boolean>[][];  // Array per slot
+  settings?: Record<string, string | number | boolean>; // Global settings
+  slotSettings?: Array<Record<string, string | number | boolean> | undefined>; // Per-slot settings
+  cardMetadata?: CardMetadata[];  // Card context per slot
+  tabMetadata?: { titles: string[]; cardTypes: string[]; cardIds: string[] };
+  theme?: { colors: string[]; mode: 'light' | 'dark' | 'system' };
+  inlineFilters?: ReactNode[];
+  filters?: DashboardFilter[];
+  filterValues?: ActiveFilterValue[];
 };
 ```
 
@@ -135,6 +163,31 @@ type CustomFilterProps = {
   isSingleSelect?: boolean;
 };
 ```
+
+### Settings System
+
+Plugins control their settings via the manifest. Multi-input visuals support two types:
+
+| Type | Purpose | Manifest Field | Prop Received |
+|------|---------|----------------|---------------|
+| **Global** | Entire visual | `settings` | `settings` |
+| **Per-slot** | Individual tabs | `slotSettings` | `slotSettings[]` |
+
+**Convention-based defaults**: Settings named `title` or `description` auto-fill from card values:
+
+```typescript
+// Manifest
+slotSettings: {
+  title: { title: 'Title', defaultValue: '', ui: 'input' }
+}
+
+// Component - always fall back to cardMetadata
+const title = slotSettings?.[index]?.title || cardMetadata?.[index]?.title || 'Default';
+```
+
+**UI Experience**:
+- Tab 0 shows: "Global Settings" + "Slot 0 Settings"
+- Tab 1+ shows: "Slot N Settings" only
 
 ### Inline Filters
 
@@ -274,16 +327,39 @@ const colors = theme?.colors || ['#3b82f6', '#10b981'];
 Define docs inline in `components.config.ts`:
 
 ```typescript
+// Single-input visual
 {
   name: 'My Visual',
   component: 'MyVisual',  // Must match export name exactly
   componentType: 'chart',
   chartType: 'my-visual',
+  settings: {
+    title: { title: 'Title', defaultValue: '', ui: 'input' },
+  },
   docs: {
     description: 'What this visual does',
     dataSchema: '| Column | Type | Description |...',
     useCases: ['Use case 1', 'Use case 2'],
   },
+}
+
+// Multi-input visual
+{
+  name: 'Multi KPI Grid',
+  component: 'MultiKpiGrid',
+  componentType: 'chart',
+  chartType: 'multi-kpi-grid',
+  visualType: 'multiple',
+  minInputs: 1,
+  maxInputs: 12,
+  settings: {  // Global settings (shown on Tab 0)
+    showGrid: { title: 'Show Grid', defaultValue: 'true', ui: 'select', options: [...] },
+  },
+  slotSettings: {  // Per-slot settings (shown on each tab)
+    title: { title: 'Title', defaultValue: '', ui: 'input' },  // Auto-fills from card
+    lineColor: { title: 'Color', defaultValue: 'blue', ui: 'input' },
+  },
+  docs: { ... },
 }
 ```
 

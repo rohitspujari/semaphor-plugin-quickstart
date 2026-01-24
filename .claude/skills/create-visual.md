@@ -67,9 +67,10 @@ When a user configures a multi-input visual in Semaphor's dashboard editor:
 4. **Configure each tab**: Each tab has its own:
    - Data source selection
    - SQL query or table selection
-   - Individual settings
-5. **Preview button**: User clicks Preview to see all tabs' data combined
-6. **Save**: All tab configurations are saved together as one card
+   - Per-slot settings (from `manifest.slotSettings`)
+5. **Config tab (Tab 0)**: Also shows global settings (from `manifest.settings`)
+6. **Preview button**: User clicks Preview to see all tabs' data combined
+7. **Save**: All tab configurations are saved together as one card
 
 ### The Data Your Component Receives
 
@@ -82,6 +83,8 @@ Tab 3 query runs → data[2]
 
 Your component receives:
 - `data`: Array of arrays - `data[0]` is Tab 1's query results, `data[1]` is Tab 2's, etc.
+- `settings`: Global settings (applies to entire visual, configured on Tab 0)
+- `slotSettings`: Per-slot settings array - `slotSettings[0]` for Tab 1, etc.
 - `tabMetadata.titles`: Array of tab titles the user entered
 - `tabMetadata.cardIds`: Unique IDs for React keys
 - `cardMetadata`: Rich metadata about each tab's configuration (see reference below)
@@ -121,6 +124,7 @@ import { SingleInputVisualProps } from '../../config-types';
 export function {PascalCaseName}({
   data,
   settings,
+  cardMetadata,
   theme,
   inlineFilters = [],
 }: SingleInputVisualProps) {
@@ -138,8 +142,10 @@ export function {PascalCaseName}({
   const valueKey = keys[1];  // 2nd column
   // Add more as needed: const detailsKey = keys[2];
 
-  // Settings
-  const title = (settings?.title as string) || '{Default Title}';
+  // Settings (user-configurable via manifest)
+  // Note: 'title' and 'description' settings auto-default to card values
+  const title = (settings?.title as string) || cardMetadata?.title || '{Default Title}';
+  const description = cardMetadata?.description;
 
   // Theme colors
   const primaryColor = theme?.colors?.[0] || '#3b82f6';
@@ -153,8 +159,9 @@ export function {PascalCaseName}({
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - uses cardMetadata for context */}
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
 
       {/* Content */}
       <div className="flex-1">
@@ -282,6 +289,7 @@ import { SingleInputVisualProps } from '../../config-types';
 export function {PascalCaseName}({
   data,
   settings,
+  cardMetadata,
   theme,
   inlineFilters = [],
 }: SingleInputVisualProps) {
@@ -293,8 +301,10 @@ export function {PascalCaseName}({
     );
   }
 
-  // Settings
-  const title = (settings?.title as string) || '{Default Title}';
+  // Settings (user-configurable via manifest)
+  // Note: 'title' and 'description' settings auto-default to card values
+  const title = (settings?.title as string) || cardMetadata?.title || '{Default Title}';
+  const description = cardMetadata?.description;
 
   // Theme colors
   const primaryColor = theme?.colors?.[0] || '#3b82f6';
@@ -308,8 +318,9 @@ export function {PascalCaseName}({
         </div>
       )}
 
-      {/* Header */}
+      {/* Header - uses cardMetadata for context */}
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      {description && <p className="text-sm text-muted-foreground mb-4">{description}</p>}
 
       {/* Content */}
       <div className="flex-1">
@@ -417,6 +428,85 @@ SELECT name AS label, amount AS value FROM table
 
 ---
 
+## Settings System
+
+### Overview
+
+Plugins control their own settings via the manifest. There are two types:
+
+| Type | Purpose | Manifest Field | Prop Received |
+|------|---------|----------------|---------------|
+| **Global settings** | Apply to entire visual | `settings` | `settings` |
+| **Per-slot settings** | Apply to individual tabs/slots | `slotSettings` | `slotSettings[]` |
+
+### Single-Input Visuals
+
+Single-input visuals only use `settings` (no slots):
+
+```typescript
+// Manifest
+{
+  settings: {
+    title: { title: 'Title', defaultValue: '', ui: 'input' },
+    showTrend: { title: 'Show Trend', defaultValue: 'true', ui: 'select', options: [...] }
+  }
+}
+
+// Component receives
+settings?.title      // User-configured (or auto-filled from card)
+settings?.showTrend  // User-configured
+```
+
+### Multi-Input Visuals
+
+Multi-input visuals can use both `settings` (global) and `slotSettings` (per-slot):
+
+```typescript
+// Manifest
+{
+  settings: {
+    showGrid: { title: 'Show Grid', defaultValue: 'true', ui: 'select', options: [...] },
+    colorScheme: { title: 'Color Scheme', defaultValue: 'default', ui: 'select', options: [...] }
+  },
+  slotSettings: {
+    title: { title: 'Title', defaultValue: '', ui: 'input' },
+    lineColor: { title: 'Line Color', defaultValue: 'blue', ui: 'input' }
+  }
+}
+
+// Component receives
+settings?.showGrid           // Global - applies to all slots
+settings?.colorScheme        // Global - applies to all slots
+slotSettings?.[0]?.title     // Per-slot - for slot 0
+slotSettings?.[0]?.lineColor // Per-slot - for slot 0
+slotSettings?.[1]?.title     // Per-slot - for slot 1
+```
+
+### Title/Description Convention
+
+**Important**: For settings named `title` or `description`, Semaphor automatically pre-fills values from the card:
+
+```typescript
+// If manifest defines:
+slotSettings: {
+  title: { title: 'Title', defaultValue: '', ui: 'input' }
+}
+
+// User sees the card's title pre-filled in the UI
+// If they don't change it, slotSettings[n]?.title may be undefined
+// Always fall back to cardMetadata:
+const title = slotSettings?.[index]?.title || cardMetadata?.[index]?.title || 'Default';
+```
+
+This ensures consistency - the visual title matches the card title by default.
+
+### UI Experience
+
+- **Tab 0 (Config Tab)**: Shows both "Global Settings" AND "Slot 0 Settings"
+- **Tab 1+ (Input Tabs)**: Shows only "Slot N Settings"
+
+---
+
 ## Multi-Input Visual Templates
 
 Use these templates when the user wants to create a visual that combines data from multiple tabs.
@@ -453,49 +543,49 @@ Use `parseKPIData(tabData)` from `kpi-utils.ts` to easily extract current/compar
 
 ### Full CardMetadata Reference
 
-When building KPI-aware visuals, `cardMetadata` provides rich context for each tab:
+CardMetadata provides rich context about each card. Both single-input and multi-input visuals receive the same structure:
+
+| Visual Type | cardMetadata Shape | Access Pattern |
+|-------------|-------------------|----------------|
+| Single-input | `CardMetadata` (single object) | `cardMetadata?.title` |
+| Multi-input | `CardMetadata[]` (array) | `cardMetadata?.[index]?.title` |
 
 ```typescript
-// Full CardMetadata structure for each tab
-cardMetadata?.[index] = {
+// Full CardMetadata structure
+type CardMetadata = {
   // Basic info
-  cardType: 'kpi',           // or 'bar', 'table', etc.
-  title: 'Revenue',          // Tab title the user entered
+  cardType: 'kpi' | 'bar' | 'line' | 'table' | string;
+  title: string;           // Card title (tabTitle || title)
+  description?: string;    // Card description (if set)
 
   // KPI-specific configuration (only present for KPI card types)
-  kpiConfig: {
+  kpiConfig?: {
     // Comparison metadata from the backend
-    comparisonMetadata: {
+    comparisonMetadata?: {
       'comparison-id': {
-        type: 'previous_period',  // or 'same_period_last_year', 'target', 'start_vs_end'
-        displayLabel: 'vs Last Month',  // Human-readable label
-        displayName: 'Revenue',
-        currentPeriod: {
-          start: '2024-02-01',   // ISO date string
-          end: '2024-02-29'
-        },
-        comparisonPeriod: {
-          start: '2024-01-01',   // ISO date string
-          end: '2024-01-31'
-        }
+        type: 'previous_period' | 'same_period_last_year' | 'target' | 'start_vs_end';
+        displayLabel: string;  // e.g., 'vs Last Month'
+        displayName: string;
+        currentPeriod?: { start: string; end: string };
+        comparisonPeriod?: { start: string; end: string };
       }
-    },
+    };
 
     // User-configured options
-    options: {
-      lowerIsBetter: false,    // If true, decreases are shown as positive
-      showComparison: true,    // Whether to show comparison value
-      showTrendline: false     // Whether trendline data is included
-    },
+    options?: {
+      lowerIsBetter?: boolean;    // If true, decreases are shown as positive
+      showComparison?: boolean;   // Whether to show comparison value
+      showTrendline?: boolean;    // Whether trendline data is included
+    };
 
     // Number formatting preferences
-    formatNumber: {
-      decimalPlaces: 2,
-      suffix: '%',             // e.g., '%', 'K', 'M'
-      locale: 'en-US',
-      currency: 'USD'          // If set, uses currency formatting
-    }
-  }
+    formatNumber?: {
+      decimalPlaces?: number;
+      suffix?: string;         // e.g., '%', 'K', 'M'
+      locale?: string;
+      currency?: string;       // If set, uses currency formatting
+    };
+  };
 };
 ```
 
@@ -526,6 +616,8 @@ import { MultiInputVisualProps } from '../../config-types';
  * Multi-input visual: Receives data from all tabs in the frame.
  * - data[0] = first tab's records
  * - data[1] = second tab's records
+ * - settings = global settings (applies to entire visual)
+ * - slotSettings[n] = per-slot settings for tab n
  * - tabMetadata.titles[n] = tab n's title
  * - cardMetadata[n] = rich metadata for tab n (KPI config, formatting, etc.)
  *
@@ -535,6 +627,7 @@ import { MultiInputVisualProps } from '../../config-types';
 export function {PascalCaseName}({
   data = [],
   settings,
+  slotSettings,
   theme,
   tabMetadata,
   cardMetadata,
@@ -552,6 +645,13 @@ export function {PascalCaseName}({
     );
   }
 
+  // ==========================================
+  // GLOBAL SETTINGS (from manifest.settings)
+  // ==========================================
+  // These apply to the entire visual, configured on Tab 0
+  const showGrid = settings?.showGrid ?? true;
+  const colorScheme = settings?.colorScheme ?? 'default';
+
   // Theme colors - use these for consistent styling
   const colors = theme?.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -567,9 +667,19 @@ export function {PascalCaseName}({
       {/* Render data from each tab */}
       <div className="grid grid-cols-4 gap-4">
         {data.map((tabData, index) => {
-          // Get metadata for this tab
-          const title = tabMetadata?.titles?.[index] || `Tab ${index + 1}`;
+          // ==========================================
+          // PER-SLOT SETTINGS (from manifest.slotSettings)
+          // ==========================================
+          // These are specific to each tab/slot
+          const slotSetting = slotSettings?.[index];
+          const lineColor = slotSetting?.lineColor ?? colors[index % colors.length];
+          // Note: 'title' and 'description' in slotSettings auto-default to card values
+          const slotTitle = slotSetting?.title;
+
+          // Get metadata for this tab (read-only context from Semaphor)
           const meta = cardMetadata?.[index];
+          const title = slotTitle || meta?.title || tabMetadata?.titles?.[index] || `Tab ${index + 1}`;
+          const description = meta?.description;
 
           // Handle empty tab data gracefully
           if (!tabData || tabData.length === 0) {
@@ -591,11 +701,10 @@ export function {PascalCaseName}({
             <div
               key={tabMetadata?.cardIds?.[index] ?? index}
               className="p-4 rounded-lg border"
-              style={{ borderColor: colors[index % colors.length] }}
+              style={{ borderColor: lineColor }}
             >
-              <div className="text-sm text-muted-foreground">
-                {meta?.title || title}
-              </div>
+              <div className="text-sm text-muted-foreground">{title}</div>
+              {description && <div className="text-xs text-muted-foreground">{description}</div>}
               <div className="text-2xl font-bold">{String(value)}</div>
             </div>
           );
@@ -719,6 +828,28 @@ Use when all tabs should be the same type (e.g., all KPIs).
       expectedType: 'kpi',  // Hint to users about expected card type
     },
   ],
+  // Global settings (applies to entire visual)
+  settings: {
+    showGrid: {
+      title: 'Show Grid',
+      defaultValue: 'true',
+      ui: 'select',
+      options: [{ label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }],
+    },
+  },
+  // Per-slot settings (configured on each tab)
+  slotSettings: {
+    title: {
+      title: 'Display Title',
+      defaultValue: '',  // Auto-fills from card title
+      ui: 'input',
+    },
+    lineColor: {
+      title: 'Line Color',
+      defaultValue: 'blue',
+      ui: 'input',
+    },
+  },
   docs: { /* ... */ },
 },
 ```
@@ -1052,10 +1183,12 @@ Common Lucide icons: `BarChart`, `LineChart`, `PieChart`, `Table`, `LayoutDashbo
 | Props type | `SingleInputVisualProps` | `MultiInputVisualProps` |
 | Data shape | `data: Data` (single array) | `data: DataArray` (array of arrays) |
 | Config | No `visualType` needed | `visualType: 'multiple'` required |
+| Settings | `settings` only | `settings` (global) + `slotSettings[]` (per-slot) |
 | Slots | N/A | Optional `slots` array for guidance |
 | Sample data | Single data array | Array of data arrays + `sampleTabMetadata` + `sampleCardMetadata` |
 | Key prop | Use `index` | Use `tabMetadata?.cardIds?.[index] ?? index` |
-| Metadata | Basic settings only | Rich `cardMetadata` with KPI config |
+| cardMetadata | `CardMetadata` (single object) | `CardMetadata[]` (array per slot) |
+| Manifest | `settings: {...}` | `settings: {...}` + `slotSettings: {...}` |
 
 ### Reference Examples
 
