@@ -63,28 +63,28 @@ When a user configures a multi-input visual in Semaphor's dashboard editor:
 
 1. **Select the visual**: User picks your custom visual from the chart type selector
 2. **Semaphor detects it's multi-input**: Based on `visualType: 'multiple'` in your config
-3. **Tabs appear**: The editor shows tabs at the top (Tab 1, Tab 2, etc.)
+3. **Tabs appear**: The editor shows tabs at the top (Config tab = Slot 0, plus Slot 1, Slot 2, etc.)
 4. **Configure each tab**: Each tab has its own:
    - Data source selection
    - SQL query or table selection
    - Per-slot settings (from `manifest.slotSettings`)
-5. **Config tab (Tab 0)**: Also shows global settings (from `manifest.settings`)
+5. **Config tab (Slot 0)**: Also shows global settings (from `manifest.settings`)
 6. **Preview button**: User clicks Preview to see all tabs' data combined
 7. **Save**: All tab configurations are saved together as one card
 
 ### The Data Your Component Receives
 
 ```
-Tab 1 query runs → data[0]
-Tab 2 query runs → data[1]
-Tab 3 query runs → data[2]
+Config tab (Slot 0) query runs → data[0]
+Slot 1 query runs → data[1]
+Slot 2 query runs → data[2]
 ...
 ```
 
 Your component receives:
-- `data`: Array of arrays - `data[0]` is Tab 1's query results, `data[1]` is Tab 2's, etc.
-- `settings`: Global settings (applies to entire visual, configured on Tab 0)
-- `slotSettings`: Per-slot settings array - `slotSettings[0]` for Tab 1, etc.
+- `data`: Array of arrays - `data[0]` is Slot 0 (config tab), `data[1]` is Slot 1, etc.
+- `settings`: Global settings (applies to entire visual, configured on Slot 0)
+- `slotSettings`: Per-slot settings array - `slotSettings[0]` for Slot 0, `slotSettings[1]` for Slot 1, etc.
 - `tabMetadata.titles`: Array of tab titles the user entered
 - `tabMetadata.cardIds`: Unique IDs for React keys
 - `cardMetadata`: Rich metadata about each tab's configuration (see reference below)
@@ -93,9 +93,9 @@ Your component receives:
 
 | User Action | What Your Component Receives |
 |-------------|------------------------------|
-| Adds Tab 3 | `data` array grows to length 3 |
-| Names Tab 1 "Revenue" | `tabMetadata.titles[0]` = "Revenue" |
-| Configures Tab 2 as KPI | `cardMetadata[1].cardType` = "kpi" |
+| Adds Slot 2 | `data` array grows to length 3 |
+| Names Slot 1 "Revenue" | `tabMetadata.titles[1]` = "Revenue" |
+| Configures Slot 2 as KPI | `cardMetadata[2].cardType` = "kpi" |
 | Sets "lower is better" | `cardMetadata[n].kpiConfig.options.lowerIsBetter` = true |
 
 ---

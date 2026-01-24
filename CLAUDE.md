@@ -185,6 +185,10 @@ slotSettings: {
 const title = slotSettings?.[index]?.title || cardMetadata?.[index]?.title || 'Default';
 ```
 
+**UI-only defaults (not persisted)**:
+- Auto-filled title/description values are shown in the settings UI but **not saved** unless the user edits them.
+- If the card title changes later, the UI reflects the new title unless the user has overridden it.
+
 **UI Experience**:
 - Tab 0 shows: "Global Settings" + "Slot 0 Settings"
 - Tab 1+ shows: "Slot N Settings" only
