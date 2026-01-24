@@ -218,6 +218,17 @@ SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
           required: true,
         },
       ],
+      slotSettings: {
+        comparisonLabel: {
+          title: 'Comparison Label',
+          defaultValue: '',
+          ui: 'input',
+          docs: {
+            description:
+              'Label for the comparison value (e.g., "vs Last Month"). If empty, uses card metadata.',
+          },
+        },
+      },
       docs: {
         description:
           'A multi-input visual combining a KPI header with a multi-series gradient area chart. Supports multiple trend lines.',

@@ -66,13 +66,17 @@ export function KpiAreaChart({
   );
 
   const showComparison = meta?.kpiConfig?.options?.showComparison !== false;
-  const comparisonLabel = getComparisonLabel(
-    meta?.kpiConfig?.comparisonMetadata
-      ? Object.values(meta.kpiConfig.comparisonMetadata)[0]
-      : undefined
-  );
 
-  // Get title and description following the settings fallback pattern:
+  // Comparison label: slotSettings → cardMetadata → default
+  const comparisonLabel =
+    (slotSettings?.[0]?.comparisonLabel as string) ||
+    getComparisonLabel(
+      meta?.kpiConfig?.comparisonMetadata
+        ? Object.values(meta.kpiConfig.comparisonMetadata)[0]
+        : undefined
+    );
+
+  // Get title following the settings fallback pattern:
   // 1. slotSettings (user-configured per-slot)
   // 2. cardMetadata (card context from Semaphor)
   // 3. tabMetadata (tab names)
@@ -82,8 +86,6 @@ export function KpiAreaChart({
     meta?.title ||
     tabMetadata?.titles?.[0] ||
     'KPI';
-  const description =
-    (slotSettings?.[0]?.description as string) || meta?.description;
 
   // Detect series columns (all columns after the first one)
   const { chartData, seriesKeys, labelKey } = useMemo(() => {
@@ -133,11 +135,6 @@ export function KpiAreaChart({
         <div className="text-sm text-muted-foreground font-medium">
           {title}
         </div>
-        {description && (
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {description}
-          </div>
-        )}
         <div className="text-3xl font-bold mt-1">
           {formatKPIValue(currentNumber, meta?.kpiConfig?.formatNumber)}
         </div>
