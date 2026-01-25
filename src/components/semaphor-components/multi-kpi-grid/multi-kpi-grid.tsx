@@ -133,12 +133,7 @@ export function MultiKpiGrid({
 
       {/* Child KPIs Row */}
       {childData.length > 0 && (
-        <div
-          className="grid gap-4"
-          style={{
-            gridTemplateColumns: `repeat(${Math.min(childData.length, 4)}, 1fr)`,
-          }}
-        >
+        <div className="flex gap-4 w-full">
           {childData.map((tabData, idx) => {
             const index = idx + 1; // Offset by 1 since we sliced
             const meta = cardMetadata?.[index];
@@ -170,10 +165,12 @@ export function MultiKpiGrid({
               tabMetadata?.titles?.[index] ||
               `KPI ${index + 1}`;
 
+            const isLast = idx === childData.length - 1;
+
             return (
               <div
                 key={tabMetadata?.cardIds?.[index] ?? index}
-                className="min-w-0"
+                className={isLast ? 'shrink-0' : 'flex-1 basis-0 min-w-0'}
               >
                 <div className="text-xs text-muted-foreground truncate">
                   {title}
