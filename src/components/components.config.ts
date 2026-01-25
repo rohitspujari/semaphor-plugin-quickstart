@@ -162,22 +162,55 @@ LIMIT 10
       maxInputs: 12,
       slots: [
         {
-          position: '0+',
-          label: 'KPI',
-          description: 'Each tab renders as a KPI card.',
+          position: 0,
+          label: 'Hero KPI',
+          description: 'Primary KPI displayed prominently at the top.',
+          expectedType: 'kpi',
+          required: true,
+        },
+        {
+          position: '1+',
+          label: 'Child KPI',
+          description: 'Additional KPIs displayed in a row below the hero.',
           expectedType: 'kpi',
           required: false,
         },
       ],
+      settings: {
+        infoTooltip: {
+          title: 'Info Tooltip',
+          defaultValue: '',
+          ui: 'input',
+          docs: {
+            description:
+              'Tooltip text shown when hovering the info icon in the top-right corner. Leave empty to hide the icon.',
+          },
+        },
+      },
+      slotSettings: {
+        comparisonLabel: {
+          title: 'Comparison Label',
+          defaultValue: '',
+          ui: 'input',
+          docs: {
+            description:
+              'Label for the comparison value (e.g., "vs Last Month"). If empty, uses card metadata.',
+          },
+        },
+      },
       docs: {
         description:
-          'A multi-input KPI grid that renders each tab as a KPI card with comparison metadata.',
+          'A multi-input KPI grid with a hero KPI at the top and child KPIs in a row below. Includes optional info tooltip.',
         dataSchema: `
+### Layout
+- **Slot 0 (Hero)**: Large KPI displayed at top-left
+- **Slot 1+ (Children)**: Smaller KPIs in a row below
+
 ### Expected Data Format
 
 | Column | Type | Required | Description |
 |--------|------|----------|-------------|
-| segment | text | Yes | current, comparison, trendline |
+| segment | text | Yes | \`current\` or \`comparison\` |
 | value | number | Yes | KPI value for the segment |
 
 ### Example Query
@@ -188,9 +221,9 @@ SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
 \`\`\`
         `.trim(),
         useCases: [
-          'KPI dashboards with multiple metrics',
+          'KPI dashboards with a primary metric and supporting metrics',
+          'Executive summaries with headline KPI',
           'Comparison metrics with trend indicators',
-          'Multi-input custom visual examples',
         ],
       },
     },

@@ -1,26 +1,39 @@
+// Multi KPI Grid sample data
+// Slot 0 = Hero KPI (large, top)
+// Slot 1+ = Child KPIs (smaller, row below)
+
 export const sampleData = [
+  // Slot 0: Hero KPI - Labour Gross
   [
     { segment: 'current', value: 28494 },
     { segment: 'comparison', value: 45624 },
   ],
+  // Slot 1: Child KPI - Lbr Grs %
+  [
+    { segment: 'current', value: 73.8 },
+    { segment: 'comparison', value: 72.0 },
+  ],
+  // Slot 2: Child KPI - Labour Sale
   [
     { segment: 'current', value: 38630 },
-    { segment: 'comparison', value: 61620 },
+    { segment: 'comparison', value: 61630 },
   ],
-  [
-    { segment: 'current', value: 738 },
-    { segment: 'comparison', value: 694 },
-  ],
+  // Slot 3: Child KPI - Discounts
   [
     { segment: 'current', value: 0 },
-    { segment: 'comparison', value: 10 },
+    { segment: 'comparison', value: 0 },
+  ],
+  // Slot 4: Child KPI - $0 Hours
+  [
+    { segment: 'current', value: 0.51 },
+    { segment: 'comparison', value: 1.01 },
   ],
 ];
 
 export const sampleTabMetadata = {
-  titles: ['Labour Gross', 'Labour Sale', 'Hours', 'Discounts'],
-  cardTypes: ['kpi', 'kpi', 'kpi', 'kpi'],
-  cardIds: ['tab-1', 'tab-2', 'tab-3', 'tab-4'],
+  titles: ['Labour Gross', 'Lbr Grs %', 'Labour Sale', 'Discounts', '$0 Hours'],
+  cardTypes: ['kpi', 'kpi', 'kpi', 'kpi', 'kpi'],
+  cardIds: ['hero-kpi', 'child-1', 'child-2', 'child-3', 'child-4'],
 };
 
 export const sampleCardMetadata = [
@@ -32,6 +45,24 @@ export const sampleCardMetadata = [
         lowerIsBetter: false,
         showComparison: true,
       },
+      formatNumber: {
+        currency: 'USD',
+        decimalPlaces: 0,
+      },
+    },
+  },
+  {
+    cardType: 'kpi',
+    title: 'Lbr Grs %',
+    kpiConfig: {
+      options: {
+        lowerIsBetter: false,
+        showComparison: true,
+      },
+      formatNumber: {
+        suffix: '%',
+        decimalPlaces: 1,
+      },
     },
   },
   {
@@ -42,15 +73,9 @@ export const sampleCardMetadata = [
         lowerIsBetter: true,
         showComparison: true,
       },
-    },
-  },
-  {
-    cardType: 'kpi',
-    title: 'Hours',
-    kpiConfig: {
-      options: {
-        lowerIsBetter: false,
-        showComparison: true,
+      formatNumber: {
+        currency: 'USD',
+        decimalPlaces: 0,
       },
     },
   },
@@ -62,13 +87,32 @@ export const sampleCardMetadata = [
         lowerIsBetter: true,
         showComparison: true,
       },
+      formatNumber: {
+        currency: 'USD',
+        decimalPlaces: 0,
+      },
+    },
+  },
+  {
+    cardType: 'kpi',
+    title: '$0 Hours',
+    kpiConfig: {
+      options: {
+        lowerIsBetter: true,
+        showComparison: true,
+      },
+      formatNumber: {
+        decimalPlaces: 2,
+      },
     },
   },
 ];
 
-export const sampleTheme = {
-  colors: ['#2f80ed', '#27ae60', '#f2994a', '#eb5757'],
-  mode: 'light',
+export const sampleSettings = {
+  infoTooltip: 'Labour metrics for the current period compared to target.',
 };
 
-export const sampleSettings = [];
+export const sampleTheme = {
+  colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+  mode: 'light' as const,
+};
