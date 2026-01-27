@@ -1,10 +1,11 @@
-import type { CardMetadata } from './config-types';
+import type { CardMetadata, Data, FormatOptions, LegacyFormatNumber } from './config-types';
 import { parseISO } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 type KpiFormatNumber = NonNullable<CardMetadata['kpiConfig']>['formatNumber'];
+type KpiFormatConfig = KpiFormatNumber | FormatOptions | undefined;
 
-export function parseKPIData(data: Record<string, any>[]) {
+export function parseKPIData(data: Data) {
   const current = data.find((row) => row.segment === 'current');
   const comparison = data.find((row) => row.segment === 'comparison');
   const trendline = data.filter((row) => row.segment === 'trendline');
@@ -38,36 +39,37 @@ export function getPercentChange(
 
 export function formatKPIValue(
   value: number | undefined,
-  formatConfig?: KpiFormatNumber,
+  formatConfig?: KpiFormatConfig,
 ): string {
   if (value === undefined || Number.isNaN(value)) return '';
 
-  const {
-    decimalPlaces = 0,
-    suffix = '',
-    locale = 'en-US',
-    currency,
-  } = (formatConfig as any) || {};
+  const config: FormatOptions & LegacyFormatNumber = formatConfig ?? {};
+  const locale = config.locale || 'en-US';
+  const decimalPlaces = typeof config.decimalPlaces === 'number' ? config.decimalPlaces : 0;
+  const prefix = config.prefix || '';
+  const suffix = config.suffix || '';
+  const currency = config.currency;
+  const type = config.type;
+  const multiplyBy =
+    typeof config.multiplyBy === 'number' ? config.multiplyBy : undefined;
 
-  if (currency) {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: decimalPlaces,
-      maximumFractionDigits: decimalPlaces,
-    }).format(value);
+  const numberValue = multiplyBy !== undefined ? value * multiplyBy : value;
+
+  let style: Intl.NumberFormatOptions['style'] = 'decimal';
+  if (type === 'currency' || currency) {
+    style = currency ? 'currency' : 'decimal';
+  } else if (type === 'percent') {
+    style = 'percent';
   }
 
-  let formatted = value.toLocaleString(locale, {
+  const formatted = new Intl.NumberFormat(locale, {
+    style,
+    currency: style === 'currency' ? currency : undefined,
     minimumFractionDigits: decimalPlaces,
     maximumFractionDigits: decimalPlaces,
-  });
+  }).format(numberValue);
 
-  if (suffix) {
-    formatted += suffix;
-  }
-
-  return formatted;
+  return `${prefix}${formatted}${suffix}`;
 }
 
 export function getComparisonLabel(metadata?: { type?: string; displayLabel?: string }) {
@@ -117,6 +119,7 @@ export function formatDateRange(
   end: string,
   _displayTimezone?: string,
 ): string {
+  void _displayTimezone;
   try {
     const startDate = parseDateAsUtc(start);
     const endDate = parseDateAsUtc(end);
@@ -134,6 +137,7 @@ export function formatDateShort(
   end: string,
   _displayTimezone?: string,
 ): string {
+  void _displayTimezone;
   try {
     const startDate = parseDateAsUtc(start);
     const endDate = parseDateAsUtc(end);

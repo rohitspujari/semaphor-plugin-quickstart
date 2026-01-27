@@ -67,6 +67,8 @@ export function MultiKpiGrid({
         ? Object.values(heroMeta.kpiConfig.comparisonMetadata)[0]
         : undefined
     );
+  // Format config: prefer formatConfig.kpi.primary, fallback to legacy kpiConfig.formatNumber
+  const heroPrimaryFormat = heroMeta?.formatConfig?.kpi?.primary ?? heroMeta?.kpiConfig?.formatNumber;
   const heroTitle =
     (slotSettings?.[0]?.title as string) ||
     heroMeta?.title ||
@@ -86,7 +88,7 @@ export function MultiKpiGrid({
             {heroTitle}
           </div>
           <div className="text-3xl font-bold mt-1">
-            {formatKPIValue(heroCurrentNumber, heroMeta?.kpiConfig?.formatNumber)}
+            {formatKPIValue(heroCurrentNumber, heroPrimaryFormat)}
           </div>
           {heroShowComparison &&
             heroComparisonValue !== undefined &&
@@ -104,7 +106,7 @@ export function MultiKpiGrid({
                   {heroChange.isNeutral ? '—' : heroChange.isPositive ? '↑' : '↓'}{' '}
                   {formatKPIValue(
                     Math.abs(heroCurrentNumber! - heroComparisonNumber!),
-                    heroMeta?.kpiConfig?.formatNumber
+                    heroPrimaryFormat
                   )}
                 </span>
                 {heroComparisonLabel && (
@@ -164,6 +166,8 @@ export function MultiKpiGrid({
               meta?.title ||
               tabMetadata?.titles?.[index] ||
               `KPI ${index + 1}`;
+            // Format config: prefer formatConfig.kpi.primary, fallback to legacy kpiConfig.formatNumber
+            const primaryFormat = meta?.formatConfig?.kpi?.primary ?? meta?.kpiConfig?.formatNumber;
 
             const isLast = idx === childData.length - 1;
 
@@ -176,7 +180,7 @@ export function MultiKpiGrid({
                   {title}
                 </div>
                 <div className="text-lg font-semibold mt-0.5">
-                  {formatKPIValue(currentNumber, meta?.kpiConfig?.formatNumber)}
+                  {formatKPIValue(currentNumber, primaryFormat)}
                 </div>
                 {showComparison &&
                   comparisonValue !== undefined &&

@@ -130,6 +130,20 @@ type CardMetadata = {
     options?: { lowerIsBetter?: boolean; showTrendline?: boolean; showComparison?: boolean };
     formatNumber?: Record<string, any>;
   };
+  formatConfig?: CustomVisualFormatConfig; // Normalized formatting info
+};
+
+type CustomVisualFormatConfig = {
+  kpi?: { primary?: FormatOptions; comparison?: FormatOptions; colorRanges?: any[] };
+  axes?: { xAxis?: FormatOptions; yAxis?: FormatOptions; secondaryYAxis?: FormatOptions };
+  dataLabels?: FormatOptions;
+  tables?: {
+    columns?: Array<{ id?: string; label?: string; position?: number; numberFormat?: any }>;
+    columnMap?: Record<string, { numberFormat?: any }>;
+    comparison?: FormatOptions;
+    defaultNumberFormat?: FormatOptions;
+  };
+  legacy?: { formatNumber?: Record<string, any>; numberAxisFormat?: Record<string, any> };
 };
 ```
 
@@ -313,6 +327,83 @@ Settings values are always strings. Parse as needed:
 const title = (settings?.title as string) || 'Default';
 const count = Number(settings?.count) || 10;
 const enabled = settings?.enabled !== 'false';
+```
+
+### Number Formatting
+
+Custom visuals receive formatting configuration via `cardMetadata.formatConfig`. This normalized structure provides consistent access to number formatting across all card types.
+
+#### When to Use Which Formatter
+
+| Card Type | Primary Source | Fallback |
+|-----------|---------------|----------|
+| KPI | `formatConfig.kpi.primary` | `kpiConfig.formatNumber` |
+| KPI Comparison | `formatConfig.kpi.comparison` | - |
+| Chart Data Labels | `formatConfig.dataLabels` | `formatConfig.axes.yAxis` |
+| Chart Y-Axis | `formatConfig.axes.yAxis` | `formatConfig.legacy.formatNumber` |
+| Chart X-Axis | `formatConfig.axes.xAxis` | - |
+| Combo Secondary Axis | `formatConfig.axes.secondaryYAxis` | - |
+| Table Columns | `formatConfig.tables.columns[n].numberFormat` | `formatConfig.tables.defaultNumberFormat` |
+
+#### Complete Fallback Patterns
+
+**KPI Values:**
+```typescript
+const primaryFormat = cardMetadata?.formatConfig?.kpi?.primary
+  ?? cardMetadata?.kpiConfig?.formatNumber;
+const comparisonFormat = cardMetadata?.formatConfig?.kpi?.comparison;
+```
+
+**Chart Values:**
+```typescript
+// Data labels
+const labelFormat = cardMetadata?.formatConfig?.dataLabels
+  ?? cardMetadata?.formatConfig?.axes?.yAxis;
+
+// Y-axis ticks
+const yAxisFormat = cardMetadata?.formatConfig?.axes?.yAxis
+  ?? cardMetadata?.formatConfig?.legacy?.formatNumber;
+```
+
+**Table Values:**
+```typescript
+// By column index
+const colFormat = cardMetadata?.formatConfig?.tables?.columns?.[colIndex]?.numberFormat;
+
+// By column id (if available)
+const colFormat = cardMetadata?.formatConfig?.tables?.columnMap?.[columnId]?.numberFormat;
+
+// Fallback to default
+const format = colFormat ?? cardMetadata?.formatConfig?.tables?.defaultNumberFormat;
+```
+
+#### Formatting Values
+
+Use the format config to format values:
+
+```typescript
+function formatValue(value: number, format?: FormatOptions): string {
+  if (!format) return value.toLocaleString();
+
+  const options: Intl.NumberFormatOptions = {
+    minimumFractionDigits: format.decimalPlaces,
+    maximumFractionDigits: format.decimalPlaces,
+  };
+
+  if (format.type === 'currency' && format.currency) {
+    options.style = 'currency';
+    options.currency = format.currency;
+  } else if (format.type === 'percent') {
+    options.style = 'percent';
+  }
+
+  let result = new Intl.NumberFormat(format.locale || 'en-US', options).format(value);
+
+  if (format.prefix) result = format.prefix + result;
+  if (format.suffix) result = result + format.suffix;
+
+  return result;
+}
 ```
 
 ### Critical: Styling for Embedded Plugins

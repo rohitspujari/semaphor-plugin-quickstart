@@ -248,6 +248,7 @@ SELECT 'comparison' AS segment, SUM(revenue) AS value FROM orders_prev
           position: 1,
           label: 'Trend Data',
           description: 'Time series data (1st col = label, remaining cols = series values).',
+          expectedType: 'bar',
           required: true,
         },
       ],

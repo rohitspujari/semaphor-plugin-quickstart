@@ -86,18 +86,98 @@ export type TabMetadata = {
   cardIds: string[];
 };
 
+export type ComparisonMetadataEntry = {
+  type: 'previous_period' | 'same_period_last_year' | 'start_vs_end' | 'target';
+  displayName?: string;
+  displayLabel?: string;
+  currentPeriod?: { start: string; end: string };
+  comparisonPeriod?: { start: string; end: string };
+};
+
+export type ComparisonMetadataMap = Record<string, ComparisonMetadataEntry>;
+
 export type CardMetadata = {
   cardType: string;
   title: string;
   description?: string;
   kpiConfig?: {
-    comparisonMetadata?: Record<string, any>;
+    comparisonMetadata?: ComparisonMetadataMap;
     options?: {
       lowerIsBetter?: boolean;
       showTrendline?: boolean;
       showComparison?: boolean;
     };
-    formatNumber?: Record<string, any>;
+    formatNumber?: LegacyFormatNumber;
+  };
+  formatConfig?: CustomVisualFormatConfig;
+};
+
+export type FormatOptions = {
+  type?: 'auto' | 'number' | 'currency' | 'percent' | 'scientific' | 'date';
+  decimalPlaces?: number;
+  currency?: string;
+  locale?: string;
+  prefix?: string;
+  suffix?: string;
+  useSuffix?: boolean;
+  negativeInParentheses?: boolean;
+  multiplyBy?: number;
+  dateFormat?: string;
+};
+
+export type ColumnNumberFormat = {
+  style: 'decimal' | 'currency' | 'percent';
+  currency: string;
+  locale: string;
+  minimumFractionDigits: number;
+  maximumFractionDigits: number;
+  showDataBar: boolean;
+  dataBarColor: string;
+  dataBarMinValue?: number;
+  dataBarMaxValue?: number;
+};
+
+export type LegacyFormatNumber = {
+  decimalPlaces?: number;
+  currency?: string;
+  locale?: string;
+  suffix?: string;
+  enabled?: boolean | string;
+  colorRanges?: Array<{ start: number; end: number; color: string }>;
+  [key: string]: unknown;
+};
+
+export type CustomVisualFormatConfig = {
+  kpi?: {
+    primary?: FormatOptions;
+    comparison?: FormatOptions;
+    colorRanges?: Array<{ start: number; end: number; color: string }>;
+  };
+  axes?: {
+    xAxis?: FormatOptions;
+    yAxis?: FormatOptions;
+    secondaryYAxis?: FormatOptions;
+  };
+  dataLabels?: FormatOptions;
+  tables?: {
+    columns?: Array<{
+      id?: string;
+      label?: string;
+      position?: number;
+      numberFormat?: ColumnNumberFormat | FormatOptions;
+    }>;
+    columnMap?: Record<string, { numberFormat?: ColumnNumberFormat | FormatOptions }>;
+    comparison?: FormatOptions;
+    defaultNumberFormat?: FormatOptions;
+  };
+  legacy?: {
+    formatNumber?: LegacyFormatNumber;
+    numberAxisFormat?: {
+      decimalPlaces?: number;
+      suffix?: string;
+      currency?: string;
+      locale?: string;
+    };
   };
 };
 

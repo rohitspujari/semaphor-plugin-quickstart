@@ -16,6 +16,8 @@ import {
   ChartTooltipContent,
 } from '../../ui/chart';
 
+const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
 /**
  * KPI Area Chart
  *
@@ -32,23 +34,15 @@ export function KpiAreaChart({
   cardMetadata,
   theme,
 }: MultiInputVisualProps) {
-  const colors = theme?.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-
-  // Handle empty state
-  if (!data || data.length < 2) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground">
-        <p>Configure both KPI and Trend tabs to see the visualization</p>
-      </div>
-    );
-  }
+  const colors = useMemo(() => theme?.colors ?? DEFAULT_COLORS, [theme?.colors]);
 
   const kpiData = data[0] || [];
-  const trendData = data[1] || [];
-
   // Parse KPI data from slot 0
   const { currentValue, comparisonValue } = parseKPIData(kpiData);
   const meta = cardMetadata?.[0];
+
+  // Format config: prefer formatConfig.kpi.primary, fallback to legacy kpiConfig.formatNumber
+  const primaryFormat = meta?.formatConfig?.kpi?.primary ?? meta?.kpiConfig?.formatNumber;
 
   const currentNumber =
     currentValue === null || currentValue === undefined
@@ -89,6 +83,7 @@ export function KpiAreaChart({
 
   // Detect series columns (all columns after the first one)
   const { chartData, seriesKeys, labelKey } = useMemo(() => {
+    const trendData = data[1] || [];
     if (!trendData || trendData.length === 0) {
       return { chartData: [], seriesKeys: [], labelKey: '' };
     }
@@ -108,7 +103,7 @@ export function KpiAreaChart({
     });
 
     return { chartData: processed, seriesKeys: series, labelKey: label };
-  }, [trendData]);
+  }, [data]);
 
   // Generate unique gradient IDs for each series
   const gradientIds = useMemo(() => {
@@ -128,6 +123,15 @@ export function KpiAreaChart({
     return config;
   }, [seriesKeys, colors]);
 
+  // Handle empty state (after hooks to keep hook order stable)
+  if (!data || data.length < 2) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[200px] text-muted-foreground">
+        <p>Configure both KPI and Trend tabs to see the visualization</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full p-4">
       {/* KPI Header */}
@@ -136,7 +140,7 @@ export function KpiAreaChart({
           {title}
         </div>
         <div className="text-3xl font-bold mt-1">
-          {formatKPIValue(currentNumber, meta?.kpiConfig?.formatNumber)}
+          {formatKPIValue(currentNumber, primaryFormat)}
         </div>
         {showComparison &&
           comparisonValue !== undefined &&

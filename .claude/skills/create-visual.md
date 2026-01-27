@@ -543,7 +543,7 @@ Semaphor's built-in KPI system returns data with a special `segment` column. If 
 
 **When to use this structure:**
 - Your visual displays KPI-style metrics with comparisons
-- You want to leverage `cardMetadata.kpiConfig` for formatting and comparison labels
+- You want to leverage `cardMetadata.formatConfig.kpi` (preferred) or `cardMetadata.kpiConfig` (legacy) for formatting and comparison labels
 
 **When NOT to use this structure:**
 - Your visual uses custom data shapes
@@ -597,6 +597,20 @@ type CardMetadata = {
       currency?: string;       // If set, uses currency formatting
     };
   };
+
+  // Normalized formatting (preferred)
+  formatConfig?: {
+    kpi?: { primary?: any; comparison?: any; colorRanges?: any[] };
+    axes?: { xAxis?: any; yAxis?: any; secondaryYAxis?: any };
+    dataLabels?: any;
+    tables?: {
+      columns?: Array<{ id?: string; label?: string; position?: number; numberFormat?: any }>;
+      columnMap?: Record<string, { numberFormat?: any }>;
+      comparison?: any;
+      defaultNumberFormat?: any;
+    };
+    legacy?: { formatNumber?: any; numberAxisFormat?: any };
+  };
 };
 ```
 
@@ -614,10 +628,78 @@ comparisonMeta?.comparisonPeriod?.start  // '2024-01-01'
 comparisonMeta?.comparisonPeriod?.end    // '2024-01-31'
 ```
 
+### Number Formatting in Custom Visuals
+
+Custom visuals receive `formatConfig` in `cardMetadata` for consistent number formatting across all card types.
+
+#### KPI Formatting Example
+
+```typescript
+// In your multi-input component
+data.map((tabData, index) => {
+  const meta = cardMetadata?.[index];
+  const { currentValue, comparisonValue } = parseKPIData(tabData);
+
+  // Get format config with fallback to legacy
+  const primaryFormat = meta?.formatConfig?.kpi?.primary
+    ?? meta?.kpiConfig?.formatNumber;
+  const comparisonFormat = meta?.formatConfig?.kpi?.comparison;
+
+  // Format values
+  const formattedValue = formatKPIValue(Number(currentValue ?? 0), primaryFormat);
+  const formattedComparison = comparisonFormat
+    ? formatKPIValue(Number(comparisonValue ?? 0), comparisonFormat)
+    : null;
+});
+```
+
+#### Chart Formatting Example
+
+```typescript
+// For chart data labels or axis values
+const meta = cardMetadata;
+
+// Data labels format
+const dataLabelFormat = meta?.formatConfig?.dataLabels;
+
+// Y-axis format (with fallback)
+const yAxisFormat = meta?.formatConfig?.axes?.yAxis
+  ?? meta?.formatConfig?.legacy?.formatNumber;
+
+// Format a value for display
+const formatAxisValue = (value: number) => {
+  if (!yAxisFormat) return value.toLocaleString();
+  return formatKPIValue(value, yAxisFormat);
+};
+```
+
+#### Table Column Formatting Example
+
+```typescript
+// For table-based visuals
+const meta = cardMetadata;
+const columns = meta?.formatConfig?.tables?.columns ?? [];
+const columnMap = meta?.formatConfig?.tables?.columnMap ?? {};
+const defaultFormat = meta?.formatConfig?.tables?.defaultNumberFormat;
+
+// Format by position
+const formatByPosition = (value: number, colIndex: number) => {
+  const format = columns[colIndex]?.numberFormat ?? defaultFormat;
+  return format ? formatKPIValue(value, format) : value.toLocaleString();
+};
+
+// Format by column id
+const formatById = (value: number, columnId: string) => {
+  const format = columnMap[columnId]?.numberFormat ?? defaultFormat;
+  return format ? formatKPIValue(value, format) : value.toLocaleString();
+};
+```
+
 ### Component Template (Multi-Input)
 
 ```tsx
 import { MultiInputVisualProps } from '../../config-types';
+import { formatKPIValue } from '../../kpi-utils';
 
 /**
  * {Component Name}
@@ -716,6 +798,15 @@ export function {PascalCaseName}({
           const firstRow = tabData[0] || {};
           const value = Object.values(firstRow)[0];
 
+          // Number formatting - prefer formatConfig, fallback to legacy
+          const valueFormat = meta?.formatConfig?.kpi?.primary
+            ?? meta?.kpiConfig?.formatNumber;
+
+          // Format the value for display (use formatKPIValue from kpi-utils.ts)
+          const formattedValue = valueFormat
+            ? formatKPIValue(Number(value), valueFormat)
+            : String(value);
+
           return (
             <div
               key={tabMetadata?.cardIds?.[index] ?? index}
@@ -724,7 +815,7 @@ export function {PascalCaseName}({
             >
               <div className="text-sm text-muted-foreground">{title}</div>
               {description && <div className="text-xs text-muted-foreground">{description}</div>}
-              <div className="text-2xl font-bold">{String(value)}</div>
+              <div className="text-2xl font-bold">{formattedValue}</div>
             </div>
           );
         })}
@@ -758,10 +849,17 @@ export const sampleTabMetadata = {
 };
 
 // Card metadata - rich context for each tab
+// Includes formatConfig (preferred) and kpiConfig (legacy fallback)
 export const sampleCardMetadata = [
   {
     cardType: 'kpi',
     title: 'Labour Gross',
+    formatConfig: {
+      kpi: {
+        primary: { type: 'currency', currency: 'USD', decimalPlaces: 0 },
+        comparison: { type: 'currency', currency: 'USD', decimalPlaces: 0 },
+      },
+    },
     kpiConfig: {
       options: { lowerIsBetter: false, showComparison: true },
       comparisonMetadata: {
@@ -769,25 +867,42 @@ export const sampleCardMetadata = [
           type: 'previous_period',
           displayLabel: 'vs Last Month',
         }
-      }
+      },
+      formatNumber: { currency: 'USD', decimalPlaces: 0 }  // Legacy fallback
     }
   },
   {
     cardType: 'kpi',
     title: 'Lbr Grs %',
+    formatConfig: {
+      kpi: {
+        primary: { type: 'percent', decimalPlaces: 1 },
+        comparison: { type: 'percent', decimalPlaces: 1 },
+      },
+    },
     kpiConfig: {
       options: { lowerIsBetter: false, showComparison: true },
-      formatNumber: { suffix: '%', decimalPlaces: 1 }
+      formatNumber: { suffix: '%', decimalPlaces: 1 }  // Legacy fallback
     }
   },
   {
     cardType: 'kpi',
     title: 'Labour Sale',
+    formatConfig: {
+      kpi: {
+        primary: { type: 'currency', currency: 'USD', decimalPlaces: 0 },
+      },
+    },
     kpiConfig: { options: { lowerIsBetter: true, showComparison: true } }
   },
   {
     cardType: 'kpi',
     title: 'Discounts',
+    formatConfig: {
+      kpi: {
+        primary: { type: 'number', decimalPlaces: 0 },
+      },
+    },
     kpiConfig: { options: { lowerIsBetter: true, showComparison: true } }
   },
 ];
@@ -961,7 +1076,7 @@ data.map((tabData, index) => {
   // Format value with currency/locale/suffix from card preferences
   const formatted = formatKPIValue(
     Number(currentValue ?? 0),
-    meta?.kpiConfig?.formatNumber
+    meta?.formatConfig?.kpi?.primary ?? meta?.kpiConfig?.formatNumber
   );
   // Returns: "$28,494" or "73.8%" depending on config
 
@@ -1103,7 +1218,8 @@ export function ComparisonCard({
   const vsPrev = getPercentChange(current, previous);
   const vsTarget = getPercentChange(current, target);
 
-  const formatConfig = cardMetadata?.[0]?.kpiConfig?.formatNumber;
+  const formatConfig = cardMetadata?.[0]?.formatConfig?.kpi?.primary
+    ?? cardMetadata?.[0]?.kpiConfig?.formatNumber;
 
   return (
     <div className="p-6 space-y-4">
