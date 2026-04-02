@@ -1562,6 +1562,30 @@ This uploads:
 - `dist/style.css` — Your styles
 - `dist/manifest.json` — Component metadata
 
+### Publishing to a Self-Hosted Instance
+
+If you are running Semaphor on your own infrastructure, point the CLI at your instance:
+
+**Option A: During init**
+
+When running `semaphor init`, enter your Semaphor URL when prompted:
+```
+Enter your Semaphor host URL (optional): https://analytics.acme.com
+```
+
+**Option B: With the `--host` flag**
+```bash
+semaphor publish --host https://analytics.acme.com
+```
+
+**Option C: Via environment variable**
+```bash
+export SEMAPHOR_API_URL=https://analytics.acme.com
+semaphor publish
+```
+
+Your self-hosted instance must have plugin storage configured (S3 bucket). See the [Self-Hosted Custom Visuals](https://docs.semaphor.cloud/docs/self-host/custom-visuals) guide for infrastructure setup.
+
 ### Using in Semaphor
 
 1. Open your dashboard in Semaphor
